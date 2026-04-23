@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL \"https://raw.githubusercontent.com/Code-MonkeyZhang/ticktick-mcp-enhanced/main/README.md\" --max-time 15)"
+    ]
+  }
+}

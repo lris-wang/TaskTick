@@ -1,0 +1,95 @@
+{
+  "app": {
+    "name": "TaskTick"
+  },
+  "nav": {
+    "today": "今日",
+    "planned": "計画",
+    "engaged": "進行中",
+    "next": "次へ",
+    "all": "すべて",
+    "completed": "完了済み",
+    "inbox": "受信箱"
+  },
+  "task": {
+    "create": "タスク作成",
+    "edit": "タスク編集",
+    "delete": "削除",
+    "restore": "復元",
+    "permanentDelete": "完全削除",
+    "title": "タイトル",
+    "description": "説明",
+    "dueDate": "期限",
+    "startDate": "開始日",
+    "priority": "優先度",
+    "priority0": "なし",
+    "priority1": "低",
+    "priority2": "中",
+    "priority3": "高",
+    "tags": "タグ",
+    "projects": "プロジェクト",
+    "subtasks": "サブタスク",
+    "attachments": "添付ファイル",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "add": "追加",
+    "completed": "完了",
+    "pending": "未完了"
+  },
+  "project": {
+    "create": "プロジェクト作成",
+    "edit": "プロジェクト編集",
+    "delete": "削除",
+    "name": "名前",
+    "color": "色",
+    "group": "グループ"
+  },
+  "group": {
+    "create": "グループ作成",
+    "edit": "グループ編集",
+    "delete": "削除",
+    "name": "名前",
+    "noGroup": "グループなし"
+  },
+  "tag": {
+    "create": "タグ作成",
+    "edit": "タグ編集",
+    "delete": "削除",
+    "name": "名前",
+    "color": "色"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "logout": "ログアウト",
+    "email": "メール",
+    "password": "パスワード",
+    "username": "ユーザー名"
+  },
+  "pomodoro": {
+    "title": "ポモドーロ",
+    "start": "開始",
+    "pause": "一時停止",
+    "resume": "再開",
+    "stop": "停止",
+    "duration": "時間",
+    "linkTask": "タスク連携",
+    "today": "今日",
+    "todayDuration": "今日の時間",
+    "week": "今週",
+    "weekDuration": "今週の時間"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "search": "検索",
+    "noData": "データなし"
+  }
+}

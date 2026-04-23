@@ -1,0 +1,18 @@
+{
+  "name": "tasktick",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "pnpm --filter @tasktick/shared build && pnpm --filter @tasktick/web build",
+    "dev:web": "pnpm --filter @tasktick/web dev",
+    "dev:desktop": "concurrently -k \"pnpm dev:web\" \"wait-on tcp:127.0.0.1:5173 && pnpm --filter @tasktick/desktop dev\"",
+    "lint:web": "pnpm --filter @tasktick/web lint",
+    "typecheck:web": "pnpm --filter @tasktick/web typecheck",
+    "dist:win": "pnpm build && pnpm --filter @tasktick/desktop dist:win",
+    "dist:android": "pnpm build && pnpm --filter @tasktick/mobile android:assembleDebug"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "wait-on": "^8.0.2"
+  }
+}

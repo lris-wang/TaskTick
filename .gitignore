@@ -1,0 +1,29 @@
+node_modules/
+dist/
+apps/desktop/release/
+*.local
+.DS_Store
+
+# Python / API
+services/api/.env
+services/api/**/*.db
+services/api/**/__pycache__/
+services/api/.vapid_keys.json
+
+# Frontend
+apps/web/.env.local
+apps/web/.env.*.local
+.venv/
+venv/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+
+# TypeScript / build metadata
+*.tsbuildinfo
+
+# Logs / IDE
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json

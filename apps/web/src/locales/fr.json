@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "Aujourd'hui",
+    "planned": "Planifié",
+    "engaged": "En cours",
+    "next": "Suivant",
+    "all": "Tous",
+    "completed": "Terminé",
+    "inbox": "Boîte de réception"
+  },
+  "task": {
+    "create": "Créer une tâche",
+    "edit": "Modifier la tâche",
+    "delete": "Supprimer",
+    "restore": "Restaurer",
+    "permanentDelete": "Supprimer définitivement",
+    "title": "Titre",
+    "description": "Description",
+    "dueDate": "Date limite",
+    "startDate": "Date de début",
+    "priority": "Priorité",
+    "priority0": "Aucune",
+    "priority1": "Basse",
+    "priority2": "Moyenne",
+    "priority3": "Haute",
+    "tags": "Étiquettes",
+    "projects": "Projets",
+    "subtasks": "Sous-tâches",
+    "attachments": "Pièces jointes",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "completed": "Terminé",
+    "pending": "En attente"
+  },
+  "project": {
+    "create": "Créer un projet",
+    "edit": "Modifier le projet",
+    "delete": "Supprimer",
+    "name": "Nom",
+    "color": "Couleur",
+    "group": "Groupe"
+  },
+  "group": {
+    "create": "Créer un groupe",
+    "edit": "Modifier le groupe",
+    "delete": "Supprimer",
+    "name": "Nom",
+    "noGroup": "Sans groupe"
+  },
+  "tag": {
+    "create": "Créer une étiquette",
+    "edit": "Modifier l'étiquette",
+    "delete": "Supprimer",
+    "name": "Nom",
+    "color": "Couleur"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "logout": "Déconnexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "username": "Nom d'utilisateur"
+  },
+  "pomodoro": {
+    "title": "Pomodoro",
+    "start": "Démarrer",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "stop": "Arrêter",
+    "duration": "Durée",
+    "linkTask": "Lier la tâche",
+    "today": "Aujourd'hui",
+    "todayDuration": "Temps aujourd'hui",
+    "week": "Cette semaine",
+    "weekDuration": "Temps cette semaine"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "noData": "Aucune donnée"
+  }
+}

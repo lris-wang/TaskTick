@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "اليوم",
+    "planned": "مخطط",
+    "engaged": "قيد التنفيذ",
+    "next": "التالي",
+    "all": "الكل",
+    "completed": "مكتمل",
+    "inbox": "صندوق الوارد"
+  },
+  "task": {
+    "create": "إنشاء مهمة",
+    "edit": "تعديل المهمة",
+    "delete": "حذف",
+    "restore": "استعادة",
+    "permanentDelete": "حذف نهائي",
+    "title": "العنوان",
+    "description": "الوصف",
+    "dueDate": "تاريخ الاستحقاق",
+    "startDate": "تاريخ البدء",
+    "priority": "الأولوية",
+    "priority0": "لا شيء",
+    "priority1": "منخفضة",
+    "priority2": "متوسطة",
+    "priority3": "عالية",
+    "tags": "الوسوم",
+    "projects": "المشاريع",
+    "subtasks": "المهام الفرعية",
+    "attachments": "المرفقات",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "add": "إضافة",
+    "completed": "مكتمل",
+    "pending": "معلق"
+  },
+  "project": {
+    "create": "إنشاء مشروع",
+    "edit": "تعديل المشروع",
+    "delete": "حذف",
+    "name": "الاسم",
+    "color": "اللون",
+    "group": "المجموعة"
+  },
+  "group": {
+    "create": "إنشاء مجموعة",
+    "edit": "تعديل المجموعة",
+    "delete": "حذف",
+    "name": "الاسم",
+    "noGroup": "بدون مجموعة"
+  },
+  "tag": {
+    "create": "إنشاء وسم",
+    "edit": "تعديل الوسم",
+    "delete": "حذف",
+    "name": "الاسم",
+    "color": "اللون"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "username": "اسم المستخدم"
+  },
+  "pomodoro": {
+    "title": "بومودورو",
+    "start": "بدء",
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف",
+    "stop": "إيقاف",
+    "duration": "المدة",
+    "linkTask": "ربط مهمة",
+    "today": "اليوم",
+    "todayDuration": "وقت اليوم",
+    "week": "هذا الأسبوع",
+    "weekDuration": "وقت الأسبوع"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "search": "بحث",
+    "noData": "لا توجد بيانات"
+  }
+}

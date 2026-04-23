@@ -1,0 +1,95 @@
+{
+  "app": {
+    "name": "TaskTick"
+  },
+  "nav": {
+    "today": "Hoy",
+    "planned": "Planificado",
+    "engaged": "En progreso",
+    "next": "Siguiente",
+    "all": "Todos",
+    "completed": "Completado",
+    "inbox": "Bandeja de entrada"
+  },
+  "task": {
+    "create": "Crear tarea",
+    "edit": "Editar tarea",
+    "delete": "Eliminar",
+    "restore": "Restaurar",
+    "permanentDelete": "Eliminar permanentemente",
+    "title": "Título",
+    "description": "Descripción",
+    "dueDate": "Fecha límite",
+    "startDate": "Fecha de inicio",
+    "priority": "Prioridad",
+    "priority0": "Ninguna",
+    "priority1": "Baja",
+    "priority2": "Media",
+    "priority3": "Alta",
+    "tags": "Etiquetas",
+    "projects": "Proyectos",
+    "subtasks": "Subtareas",
+    "attachments": "Archivos adjuntos",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "add": "Añadir",
+    "completed": "Completado",
+    "pending": "Pendiente"
+  },
+  "project": {
+    "create": "Crear proyecto",
+    "edit": "Editar proyecto",
+    "delete": "Eliminar",
+    "name": "Nombre",
+    "color": "Color",
+    "group": "Grupo"
+  },
+  "group": {
+    "create": "Crear grupo",
+    "edit": "Editar grupo",
+    "delete": "Eliminar",
+    "name": "Nombre",
+    "noGroup": "Sin grupo"
+  },
+  "tag": {
+    "create": "Crear etiqueta",
+    "edit": "Editar etiqueta",
+    "delete": "Eliminar",
+    "name": "Nombre",
+    "color": "Color"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "username": "Nombre de usuario"
+  },
+  "pomodoro": {
+    "title": "Pomodoro",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "stop": "Detener",
+    "duration": "Duración",
+    "linkTask": "Vincular tarea",
+    "today": "Hoy",
+    "todayDuration": "Tiempo de hoy",
+    "week": "Esta semana",
+    "weekDuration": "Tiempo de la semana"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "noData": "Sin datos"
+  }
+}

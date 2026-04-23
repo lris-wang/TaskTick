@@ -1,0 +1,193 @@
+name: Build Desktop Apps (Windows + macOS)
+
+on:
+  push:
+    tags:
+      - "v*"          # 打标签时构建，如 v1.0.0
+  workflow_dispatch:       # 也可手动触发
+
+jobs:
+  # ==============================================================
+  # Windows — Authenticode 代码签名
+  # ==============================================================
+  windows:
+    strategy:
+      fail-fast: false
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web dist
+        run: pnpm --filter web build
+
+      - name: Install desktop dependencies
+        run: pnpm install
+        working-directory: apps/desktop
+
+      # ---------- 代码签名（仅 tag 触发时） ----------
+      - name: Decode Windows certificate
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+        run: |
+          $cert = [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64)
+          [System.IO.File]::WriteAllBytes("windows-cert.pfx", $cert)
+          echo "WINDOWS_CERTIFICATE_PATH=$((Get-Location).Path)\windows-cert.pfx" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+
+      - name: Build Windows installer (with signing)
+        env:
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          CSC_LINK: ${{ env.WINDOWS_CERTIFICATE_PATH }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          pnpm run dist:win
+        working-directory: apps/desktop
+
+      - name: Build Windows portable (no signing — just exe)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: pnpm run dist:win:portable
+        working-directory: apps/desktop
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tasktick-desktop-win
+          path: apps/desktop/release/*.exe
+          retention-days: 30
+
+  # ==============================================================
+  # macOS — Apple Developer ID 签名 + 公证
+  # ==============================================================
+  macos:
+    strategy:
+      fail-fast: false
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web dist
+        run: pnpm --filter web build
+
+      - name: Install desktop dependencies
+        run: pnpm install
+        working-directory: apps/desktop
+
+      # ---------- 代码签名 + 公证 ----------
+      - name: Decode Apple certificate
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+        run: |
+          echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode --output apple-cert.p12
+          echo "APPLE_CERTIFICATE_PATH=$((pwd)/apple-cert.p12)" >> $GITHUB_ENV
+
+      - name: Import Apple certificate
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import "$APPLE_CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain
+          security list-keychain -d user -s build.keychain
+
+      - name: Build macOS dmg + zip (with signing)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          CSC_LINK: ${{ env.APPLE_CERTIFICATE_PATH }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: pnpm run dist:mac
+        working-directory: apps/desktop
+
+      - name: Build macOS dmg + zip (unsigned, dev mode)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
+        run: pnpm run dist:mac
+        working-directory: apps/desktop
+
+      - name: Notarize macOS app
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          APP=$(ls apps/desktop/release/*.dmg 2>/dev/null | head -1)
+          echo "Notarizing $APP ..."
+          echo "$APPLE_APP_PASSWORD" | xcrun notarytool submit "$APP" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password-stdin
+          echo "Stapling ..."
+          xcrun stapler staple "$APP"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tasktick-desktop-mac
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.zip
+          retention-days: 30
+
+  # ==============================================================
+  # Release — 发布到 GitHub Releases
+  # ==============================================================
+  release:
+    needs: [windows, macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "*.zip" | sort
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/tasktick-desktop-win/**/*.exe
+            artifacts/tasktick-desktop-mac/**/*.dmg
+            artifacts/tasktick-desktop-mac/**/*.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\.bat]
+@="batfile"
+"Content Type"="application/x-bat"
+
+[HKEY_CLASSES_ROOT\batfile]
+@="Windows Batch File"
+
+[HKEY_CLASSES_ROOT\batfile\command]
+@="\"%1\" %*"

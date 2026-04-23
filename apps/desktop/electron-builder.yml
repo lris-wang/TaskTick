@@ -1,0 +1,101 @@
+# ============================================================
+# electron-builder 配置（支持 Windows / macOS 代码签名）
+#
+# Windows 签名：
+#   1. 从 CA（如 DigiCert、Sectigo）购买代码签名证书（.p12 / .pfx）
+#   2. 将证书文件（base64 编码）添加到 GitHub Secrets：
+#        WINDOWS_CERTIFICATE_BASE64
+#        WINDOWS_CERTIFICATE_PASSWORD
+#   3. 可选：EV 证书含时间戳，无需手动戳
+#      普通证书需配合 /tr 参数（rfc3161 时间戳服务器）
+#
+# macOS 签名（Apple Developer ID）：
+#   1. 在 Apple Developer Portal 创建 Developer ID Application 证书
+#   2. 导出为 .p12，将 base64 内容填入 GitHub Secrets：
+#        APPLE_CERTIFICATE_BASE64
+#        APPLE_CERTIFICATE_PASSWORD
+#        APPLE_TEAM_ID
+# ============================================================
+
+appId: com.tasktick.desktop
+productName: TaskTick
+copyright: Copyright © 2026 TaskTick
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - main.cjs
+  - preload.cjs
+  - database.cjs
+  - package.json
+
+extraResources:
+  - from: ../web/dist
+    to: web-dist
+    filter:
+      - "**/*"
+
+# ============================================================
+# Windows
+# ============================================================
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  icon: build/icon.ico
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: TaskTick
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+
+# ============================================================
+# macOS
+# ============================================================
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.icns
+  category: public.app-category.productivity
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+
+dmg:
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+
+# ============================================================
+# Linux（可选）
+# ============================================================
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Office
+  artifactName: "${productName}-${version}.${ext}"
+
+# ============================================================
+# 发布配置（自动更新）
+# ============================================================
+publish:
+  provider: generic
+  url: https://releases.tasktick.com/

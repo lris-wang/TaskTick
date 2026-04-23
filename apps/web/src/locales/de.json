@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "Heute",
+    "planned": "Geplant",
+    "engaged": "In Bearbeitung",
+    "next": "Nächste",
+    "all": "Alle",
+    "completed": "Erledigt",
+    "inbox": "Posteingang"
+  },
+  "task": {
+    "create": "Aufgabe erstellen",
+    "edit": "Aufgabe bearbeiten",
+    "delete": "Löschen",
+    "restore": "Wiederherstellen",
+    "permanentDelete": "Endgültig löschen",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "dueDate": "Fälligkeitsdatum",
+    "startDate": "Startdatum",
+    "priority": "Priorität",
+    "priority0": "Keine",
+    "priority1": "Niedrig",
+    "priority2": "Mittel",
+    "priority3": "Hoch",
+    "tags": "Tags",
+    "projects": "Projekte",
+    "subtasks": "Unteraufgaben",
+    "attachments": "Anhänge",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "completed": "Erledigt",
+    "pending": "Ausstehend"
+  },
+  "project": {
+    "create": "Projekt erstellen",
+    "edit": "Projekt bearbeiten",
+    "delete": "Löschen",
+    "name": "Name",
+    "color": "Farbe",
+    "group": "Gruppe"
+  },
+  "group": {
+    "create": "Gruppe erstellen",
+    "edit": "Gruppe bearbeiten",
+    "delete": "Löschen",
+    "name": "Name",
+    "noGroup": "Keine Gruppe"
+  },
+  "tag": {
+    "create": "Tag erstellen",
+    "edit": "Tag bearbeiten",
+    "delete": "Löschen",
+    "name": "Name",
+    "color": "Farbe"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "username": "Benutzername"
+  },
+  "pomodoro": {
+    "title": "Pomodoro",
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "stop": "Stopp",
+    "duration": "Dauer",
+    "linkTask": "Aufgabe verknüpfen",
+    "today": "Heute",
+    "todayDuration": "Heutige Zeit",
+    "week": "Diese Woche",
+    "weekDuration": "Wochenzeit"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "search": "Suchen",
+    "noData": "Keine Daten"
+  }
+}

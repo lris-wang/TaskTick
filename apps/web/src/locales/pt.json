@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "Hoje",
+    "planned": "Planejado",
+    "engaged": "Em andamento",
+    "next": "Próximo",
+    "all": "Todos",
+    "completed": "Concluído",
+    "inbox": "Caixa de entrada"
+  },
+  "task": {
+    "create": "Criar tarefa",
+    "edit": "Editar tarefa",
+    "delete": "Excluir",
+    "restore": "Restaurar",
+    "permanentDelete": "Excluir permanentemente",
+    "title": "Título",
+    "description": "Descrição",
+    "dueDate": "Data de vencimento",
+    "startDate": "Data de início",
+    "priority": "Prioridade",
+    "priority0": "Nenhuma",
+    "priority1": "Baixa",
+    "priority2": "Média",
+    "priority3": "Alta",
+    "tags": "Tags",
+    "projects": "Projetos",
+    "subtasks": "Subtarefas",
+    "attachments": "Anexos",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "add": "Adicionar",
+    "completed": "Concluído",
+    "pending": "Pendente"
+  },
+  "project": {
+    "create": "Criar projeto",
+    "edit": "Editar projeto",
+    "delete": "Excluir",
+    "name": "Nome",
+    "color": "Cor",
+    "group": "Grupo"
+  },
+  "group": {
+    "create": "Criar grupo",
+    "edit": "Editar grupo",
+    "delete": "Excluir",
+    "name": "Nome",
+    "noGroup": "Sem grupo"
+  },
+  "tag": {
+    "create": "Criar tag",
+    "edit": "Editar tag",
+    "delete": "Excluir",
+    "name": "Nome",
+    "color": "Cor"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Registrar",
+    "logout": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "username": "Nome de usuário"
+  },
+  "pomodoro": {
+    "title": "Pomodoro",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "stop": "Parar",
+    "duration": "Duração",
+    "linkTask": "Vincular tarefa",
+    "today": "Hoje",
+    "todayDuration": "Tempo de hoje",
+    "week": "Esta semana",
+    "weekDuration": "Tempo da semana"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "search": "Pesquisar",
+    "noData": "Sem dados"
+  }
+}

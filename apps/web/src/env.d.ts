@@ -1,0 +1,24 @@
+/// <reference types="vite/client" />
+
+declare module "*.vue" {
+  import type { DefineComponent } from "vue";
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
+}
+
+declare module "vue-router" {
+  interface RouteMeta {
+    requiresAuth?: boolean;
+    guestOnly?: boolean;
+  }
+}
+
+export {};
+
+declare global {
+  interface Window {
+    tasktick?: {
+      platform: NodeJS.Platform;
+    };
+  }
+}

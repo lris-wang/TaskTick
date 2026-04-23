@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "आज",
+    "planned": "योजना",
+    "engaged": "प्रगति में",
+    "next": "अगला",
+    "all": "सभी",
+    "completed": "पूर्ण",
+    "inbox": "इनबॉक्स"
+  },
+  "task": {
+    "create": "कार्य बनाएं",
+    "edit": "कार्य संपादित करें",
+    "delete": "हटाएं",
+    "restore": "पुनर्स्थापित करें",
+    "permanentDelete": "स्थायी रूप से हटाएं",
+    "title": "शीर्षक",
+    "description": "विवरण",
+    "dueDate": "नियत तारीख",
+    "startDate": "आरंभ तिथि",
+    "priority": "प्राथमिकता",
+    "priority0": "कोई नहीं",
+    "priority1": "कम",
+    "priority2": "मध्यम",
+    "priority3": "उच्च",
+    "tags": "टैग",
+    "projects": "परियोजनाएं",
+    "subtasks": "उप-कार्य",
+    "attachments": "अटैचमेंट",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "add": "जोड़ें",
+    "completed": "पूर्ण",
+    "pending": "लंबित"
+  },
+  "project": {
+    "create": "परियोजना बनाएं",
+    "edit": "परियोजना संपादित करें",
+    "delete": "हटाएं",
+    "name": "नाम",
+    "color": "रंग",
+    "group": "समूह"
+  },
+  "group": {
+    "create": "समूह बनाएं",
+    "edit": "समूह संपादित करें",
+    "delete": "हटाएं",
+    "name": "नाम",
+    "noGroup": "बिना समूह"
+  },
+  "tag": {
+    "create": "टैग बनाएं",
+    "edit": "टैग संपादित करें",
+    "delete": "हटाएं",
+    "name": "नाम",
+    "color": "रंग"
+  },
+  "auth": {
+    "login": "लॉगिन",
+    "register": "रजिस्टर",
+    "logout": "लॉगआउट",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "username": "उपयोगकर्ता नाम"
+  },
+  "pomodoro": {
+    "title": "पोमोडोरो",
+    "start": "शुरू",
+    "pause": "रोकें",
+    "resume": "जारी रखें",
+    "stop": "बंद करें",
+    "duration": "अवधि",
+    "linkTask": "कार्य लिंक करें",
+    "today": "आज",
+    "todayDuration": "आज का समय",
+    "week": "इस सप्ताह",
+    "weekDuration": "सप्ताह का समय"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "confirm": "पुष्टि करें",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "close": "बंद करें",
+    "search": "खोजें",
+    "noData": "कोई डेटा नहीं"
+  }
+}

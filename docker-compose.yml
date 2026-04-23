@@ -1,0 +1,105 @@
+# ============================================================
+# TaskTick 全量部署
+#
+# 用法:
+#   1. 修改 .env 中的 SECRET_KEY（必须）
+#   2. 构建并启动所有服务:
+#         docker compose up -d --build
+#   3. 访问 http://your-domain.com
+#
+# 生产环境 HTTPS:
+#   - 在 nginx 前套 Cloudflare（推荐，免费）
+#   - 或在服务器上用 certbot + letsencrypt
+#   - 修改 nginx 的 server_name 为你的域名
+# ============================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tasktick_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tasktick_db
+      POSTGRES_USER: tasktick
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tasktick_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tasktick -d tasktick_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tasktick_redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: tasktick_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    container_name: tasktick_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tasktick:${POSTGRES_PASSWORD:-tasktick_secret}@postgres:5432/tasktick_db
+      REDIS_URL: redis://default:tasktick_redis@redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      # SMTP 邮件（任务提醒/验证码发送）
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER:-}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-TaskTick <noreply@yourdomain.com>}
+      # VAPID Web Push（生产环境建议通过环境变量固定）
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_APPLICATION_SERVER_KEY: ${VAPID_APPLICATION_SERVER_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:notify@yourdomain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost}
+    container_name: tasktick_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

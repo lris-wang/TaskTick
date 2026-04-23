@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "วันนี้",
+    "planned": "วางแผน",
+    "engaged": "กำลังดำเนินการ",
+    "next": "ถัดไป",
+    "all": "ทั้งหมด",
+    "completed": "เสร็จสิ้น",
+    "inbox": "กล่องขาเข้า"
+  },
+  "task": {
+    "create": "สร้างงาน",
+    "edit": "แก้ไขงาน",
+    "delete": "ลบ",
+    "restore": "กู้คืน",
+    "permanentDelete": "ลบถาวร",
+    "title": "หัวข้อ",
+    "description": "คำอธิบาย",
+    "dueDate": "กำหนดส่ง",
+    "startDate": "วันที่เริ่มต้น",
+    "priority": "ลำดับความสำคัญ",
+    "priority0": "ไม่มี",
+    "priority1": "ต่ำ",
+    "priority2": "ปานกลาง",
+    "priority3": "สูง",
+    "tags": "แท็ก",
+    "projects": "โปรเจกต์",
+    "subtasks": "งานย่อย",
+    "attachments": "ไฟล์แนบ",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "add": "เพิ่ม",
+    "completed": "เสร็จสิ้น",
+    "pending": "รอดำเนินการ"
+  },
+  "project": {
+    "create": "สร้างโปรเจกต์",
+    "edit": "แก้ไขโปรเจกต์",
+    "delete": "ลบ",
+    "name": "ชื่อ",
+    "color": "สี",
+    "group": "กลุ่ม"
+  },
+  "group": {
+    "create": "สร้างกลุ่ม",
+    "edit": "แก้ไขกลุ่ม",
+    "delete": "ลบ",
+    "name": "ชื่อ",
+    "noGroup": "ไม่มีกลุ่ม"
+  },
+  "tag": {
+    "create": "สร้างแท็ก",
+    "edit": "แก้ไขแท็ก",
+    "delete": "ลบ",
+    "name": "ชื่อ",
+    "color": "สี"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "register": "ลงทะเบียน",
+    "logout": "ออกจากระบบ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "username": "ชื่อผู้ใช้"
+  },
+  "pomodoro": {
+    "title": "โปมอดโดร",
+    "start": "เริ่ม",
+    "pause": "หยุดชั่วคราว",
+    "resume": "ดำเนินต่อ",
+    "stop": "หยุด",
+    "duration": "ระยะเวลา",
+    "linkTask": "เชื่อมโยงงาน",
+    "today": "วันนี้",
+    "todayDuration": "เวลาวันนี้",
+    "week": "สัปดาห์นี้",
+    "weekDuration": "เวลาสัปดาห์"
+  },
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "confirm": "ยืนยัน",
+    "cancel": "ยกเลิก",
+    "save": "บันทึก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "close": "ปิด",
+    "search": "ค้นหา",
+    "noData": "ไม่มีข้อมูล"
+  }
+}

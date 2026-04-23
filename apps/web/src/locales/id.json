@@ -1,0 +1,93 @@
+{
+  "app": { "name": "TaskTick" },
+  "nav": {
+    "today": "Hari ini",
+    "planned": "Direncanakan",
+    "engaged": "Sedang berlangsung",
+    "next": "Berikutnya",
+    "all": "Semua",
+    "completed": "Selesai",
+    "inbox": "Kotak masuk"
+  },
+  "task": {
+    "create": "Buat tugas",
+    "edit": "Edit tugas",
+    "delete": "Hapus",
+    "restore": "Pulihkan",
+    "permanentDelete": "Hapus permanen",
+    "title": "Judul",
+    "description": "Deskripsi",
+    "dueDate": "Tenggat",
+    "startDate": "Tanggal mulai",
+    "priority": "Prioritas",
+    "priority0": "Tidak ada",
+    "priority1": "Rendah",
+    "priority2": "Sedang",
+    "priority3": "Tinggi",
+    "tags": "Tag",
+    "projects": "Proyek",
+    "subtasks": "Sub-tugas",
+    "attachments": "Lampiran",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "add": "Tambah",
+    "completed": "Selesai",
+    "pending": "Tertunda"
+  },
+  "project": {
+    "create": "Buat proyek",
+    "edit": "Edit proyek",
+    "delete": "Hapus",
+    "name": "Nama",
+    "color": "Warna",
+    "group": "Grup"
+  },
+  "group": {
+    "create": "Buat grup",
+    "edit": "Edit grup",
+    "delete": "Hapus",
+    "name": "Nama",
+    "noGroup": "Tanpa grup"
+  },
+  "tag": {
+    "create": "Buat tag",
+    "edit": "Edit tag",
+    "delete": "Hapus",
+    "name": "Nama",
+    "color": "Warna"
+  },
+  "auth": {
+    "login": "Masuk",
+    "register": "Daftar",
+    "logout": "Keluar",
+    "email": "Email",
+    "password": "Kata sandi",
+    "username": "Nama pengguna"
+  },
+  "pomodoro": {
+    "title": "Pomodoro",
+    "start": "Mulai",
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "stop": "Berhenti",
+    "duration": "Durasi",
+    "linkTask": "Tautkan tugas",
+    "today": "Hari ini",
+    "todayDuration": "Waktu hari ini",
+    "week": "Minggu ini",
+    "weekDuration": "Waktu minggu"
+  },
+  "common": {
+    "loading": "Memuat...",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "confirm": "Konfirmasi",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "close": "Tutup",
+    "search": "Cari",
+    "noData": "Tidak ada data"
+  }
+}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>隐私政策 — TaskTick</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #1a2a3a;
+      --text-muted: #5a7a9a;
+      --accent: #18a0ff;
+      --border: rgba(24, 160, 255, 0.15);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; margin: 0; padding: 0; }
+    .container { max-width: 720px; margin: 60px auto; padding: 0 20px; }
+    .card { background: var(--card); border-radius: 16px; padding: 48px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    .updated { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+    h2 { font-size: 18px; margin-top: 36px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 15px; margin-top: 24px; }
+    p { margin: 12px 0; }
+    ul { padding-left: 20px; }
+    li { margin: 6px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { background: rgba(24,160,255,0.06); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: #15803d; }
+    .badge-red { background: rgba(239,68,68,0.15); color: #b91c1c; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 32px; color: var(--text-muted); font-size: 13px; }
+    .contact-box { background: rgba(24,160,255,0.06); border-radius: 8px; padding: 16px 20px; margin-top: 24px; }
+    .contact-box p { margin: 4px 0; }
+    @media (max-width: 600px) {
+      .card { padding: 28px 20px; }
+      h1 { font-size: 22px; }
+      table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>隐私政策</h1>
+    <p class="updated">最后更新：2026 年 4 月 18 日</p>
+
+    <p>TaskTick（"我们"、"我们的"或"应用"）尊重您的隐私。本隐私政策说明了我们在您使用 TaskTick 应用时如何收集、使用、存储和披露您的信息。</p>
+    <p>请您仔细阅读本隐私政策。如果您不同意本政策的条款，请不要使用我们的应用。</p>
+
+    <h2>一、我们收集的信息</h2>
+
+    <h3>1.1 您直接提供的信息</h3>
+    <ul>
+      <li><strong>账户信息</strong>：注册时提供的邮箱、用户名和密码（密码经过哈希处理，我们无法查看原始密码）</li>
+      <li><strong>个人资料</strong>：头像 URL（可选）</li>
+      <li><strong>任务数据</strong>：您创建的任务、笔记、项目分组、标签及其内容（标题、描述、截止日期、优先级、重复规则、附件等）</li>
+      <li><strong>团队信息</strong>：如果您创建或加入团队，相关的团队名称和成员信息</li>
+      <li><strong>AI 功能</strong>：如果您使用自然语言创建任务的 AI 功能，输入的原始文本</li>
+    </ul>
+
+    <h3>1.2 自动收集的信息</h3>
+    <ul>
+      <li><strong>使用日志</strong>：您与应用交互的基本行为（创建任务、完成时间、错误日志），用于改进产品体验</li>
+      <li><strong>设备信息</strong>：操作系统类型和版本、应用版本、IP地址（用于安全审计）</li>
+      <li><strong>本地数据</strong>：桌面客户端在本地 SQLite 数据库中存储的任务缓存（设备本地加密存储）</li>
+    </ul>
+
+    <h3>1.3 第三方服务收集的信息</h3>
+    <table>
+      <thead>
+        <tr><th>第三方服务</th><th>用途</th><th>隐私政策</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Supabase / PostgreSQL</td><td>数据库托管</td><td><a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></td></tr>
+        <tr><td>Cloudflare</td><td>CDN 和 HTTPS 加速</td><td><a href="https://cloudflare.com/privacy" target="_blank">cloudflare.com/privacy</a></td></tr>
+        <tr><td>GitHub（仅桌面端）</td><td>推送更新包</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies" target="_blank">GitHub Privacy</a></td></tr>
+        <tr><td>Apple App Store</td><td>应用分发</td><td><a href="https://www.apple.com/legal/privacy" target="_blank">Apple Privacy</a></td></tr>
+        <tr><td>Google Play</td><td>应用分发</td><td><a href="https://policies.google.com/privacy" target="_blank">Google Privacy</a></td></tr>
+        <tr><td>OpenAI API（可选）</td><td>自然语言任务解析</td><td><a href="https://openai.com/privacy" target="_blank">OpenAI Privacy</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>二、我们如何使用信息</h2>
+    <ul>
+      <li><strong>提供服务</strong>：运行、维护和改进 TaskTick 的核心功能</li>
+      <li><strong>数据同步</strong>：在您的多设备间同步任务和设置（端到端加密传输）</li>
+      <li><strong>安全防护</strong>：检测异常登录、防止滥用和垃圾信息</li>
+      <li><strong>通知提醒</strong>：在任务截止前向您发送提醒（可随时在设置中关闭）</li>
+      <li><strong>统计分析</strong>：统计用户量、功能使用率等匿名聚合数据，用于产品决策</li>
+      <li><strong>客服支持</strong>：响应您的问题和技术支持请求</li>
+    </ul>
+
+    <h2>三、数据存储和安全</h2>
+
+    <h3>3.1 存储地点</h3>
+    <ul>
+      <li><strong>服务器</strong>：数据存储于 Supabase（美国 AWS us-east-1 区域）的 PostgreSQL 数据库中</li>
+      <li><strong>桌面客户端</strong>：离线数据缓存于您设备的本地数据库，传输前经过 HTTPS 加密</li>
+    </ul>
+
+    <h3>3.2 保留期限</h3>
+    <ul>
+      <li>您的账户数据和任务数据，<strong>直到您主动删除账户</strong></li>
+      <li>删除账户后，数据在 30 天内从所有备份中清除</li>
+    </ul>
+
+    <h3>3.3 安全措施</h3>
+    <ul>
+      <li>所有网络传输强制使用 <strong>TLS 1.2+</strong> 加密（HTTPS）</li>
+      <li>数据库访问受强密码和基于角色的访问控制（RBAC）限制</li>
+      <li>我们承诺：对任何安全事件，将根据适用法律在 <strong>72 小时内</strong> 通知受影响的用户</li>
+    </ul>
+
+    <h2>四、Cookie 和追踪</h2>
+    <table>
+      <thead>
+        <tr><th>类型</th><th>是否使用</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>必要 Cookie</td><td><span class="badge badge-green">使用</span></td><td>用于保持登录状态（JWT token 存储）</td></tr>
+        <tr><td>分析 Cookie</td><td><span class="badge badge-red">不使用</span></td><td>我们不使用任何第三方分析工具</td></tr>
+        <tr><td>广告 Cookie</td><td><span class="badge badge-red">不使用</span></td><td>我们不展示任何广告</td></tr>
+      </tbody>
+    </table>
+
+    <h2>五、您的权利</h2>
+
+    <h3>5.1 访问和导出</h3>
+    <p>您可以随时在应用内<strong>导出您的全部数据</strong>（支持 JSON 格式），包含任务、笔记、标签和项目信息。</p>
+
+    <h3>5.2 更正和删除</h3>
+    <ul>
+      <li><strong>更正</strong>：您可以直接在应用内编辑您的个人信息和任务内容</li>
+      <li><strong>删除账户</strong>：在"设置"页面选择"删除账户"，我们将永久删除您的所有个人数据</li>
+      <li><strong>删除单条数据</strong>：您可以随时删除单条任务或笔记，删除后无法恢复</li>
+    </ul>
+
+    <h3>5.3 数据主体权利请求（DSR）</h3>
+    <div class="contact-box">
+      <p>📧 <strong>privacy@tasktick.com</strong></p>
+      <p style="font-size:13px;color:var(--text-muted);">（请在邮件标题注明"隐私请求"，我们将在 30 天内回复）</p>
+    </div>
+
+    <h2>六、第三方链接</h2>
+    <p>TaskTick 可能包含跳转到第三方网站的链接。我们不对第三方网站的隐私做法负责，建议您查看第三方的隐私政策。</p>
+
+    <h2>七、儿童隐私</h2>
+    <p>TaskTick <strong>不面向 13 岁以下</strong>（或所在国法定年龄）以下的儿童，我们不会故意收集儿童的个人信息。如果发现我们意外收集了儿童信息，我们将立即删除。</p>
+
+    <h2>八、国际数据传输</h2>
+    <p>我们的服务器位于<strong>美国</strong>，如果您在中国大陆或其他地区使用 TaskTick，您的数据将跨境传输到美国。我们确保任何国际传输均符合适用数据保护法律（包括 GDPR、CCPA）。</p>
+
+    <h2>九、本隐私政策变更</h2>
+    <p>我们可能不时更新本隐私政策。<strong>重大变更</strong>将在应用内显著位置通知您，变更自发布之日起生效。生效日期标注于本页面顶部。我们鼓励您定期查阅本政策。</p>
+
+    <h2>十、联系我们</h2>
+    <div class="contact-box">
+      <p>📧 <strong>privacy@tasktick.com</strong></p>
+      <p>我们将在 <strong>30 天内</strong> 回复您的请求。</p>
+    </div>
+
+    <h2>附录：数据类型说明</h2>
+    <table>
+      <thead>
+        <tr><th>数据类型</th><th>是否收集</th><th>用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>邮箱</td><td><span class="badge badge-green">✅</span></td><td>账户登录、通知</td></tr>
+        <tr><td>密码哈希</td><td><span class="badge badge-green">✅</span></td><td>账户安全（不存储明文）</td></tr>
+        <tr><td>用户名</td><td><span class="badge badge-green">✅</span></td><td>显示名称</td></tr>
+        <tr><td>任务内容</td><td><span class="badge badge-green">✅</span></td><td>核心功能</td></tr>
+        <tr><td>附件</td><td><span class="badge badge-green">✅（可选）</span></td><td>任务辅助文件</td></tr>
+        <tr><td>笔记内容</td><td><span class="badge badge-green">✅（可选）</span></td><td>随手记功能</td></tr>
+        <tr><td>团队成员信息</td><td><span class="badge badge-green">✅（可选）</span></td><td>多人协作</td></tr>
+        <tr><td>IP 地址</td><td><span class="badge badge-green">✅</span></td><td>安全审计、防滥用</td></tr>
+        <tr><td>设备信息</td><td><span class="badge badge-green">✅</span></td><td>兼容性、故障排查</td></tr>
+        <tr><td>精确位置</td><td><span class="badge badge-red">❌</span></td><td>我们不收集</td></tr>
+        <tr><td>通讯录</td><td><span class="badge badge-red">❌</span></td><td>我们不收集</td></tr>
+        <tr><td>短信/通话</td><td><span class="badge badge-red">❌</span></td><td>我们不收集</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+  <footer>
+    <p>&copy; 2026 TaskTick · <a href="/terms">服务条款</a> · <a href="/privacy">隐私政策</a></p>
+  </footer>
+</div>
+</body>
+</html>
