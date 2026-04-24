@@ -262,6 +262,7 @@ function confirmCustomDuration() {
 /** Outer nav: which panel is active */
 const activeNav = ref<"list" | "search" | "habits" | "pomodoro" | "stats" | "notes" | "settings" | "trash">("list");
 
+
 /** Sidebar module definitions */
 const NAV_MODULE_DEFS = [
   { key: "pomodoro" as const, label: t('pomodoro.title'), icon: "🍅" },

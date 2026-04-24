@@ -283,6 +283,7 @@
     "customDuration": "自定义时长"
   },
   "smartlist": {
+    "title": "智能清单",
     "create": "创建智能清单",
     "edit": "编辑智能清单",
     "delete": "删除",

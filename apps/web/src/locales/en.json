@@ -285,6 +285,7 @@
     "customDuration": "Custom Duration"
   },
   "smartlist": {
+    "title": "Smart Lists",
     "create": "Create Smart List",
     "edit": "Edit Smart List",
     "delete": "Delete",
