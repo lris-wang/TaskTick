@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TaskTick
 
 滴答类任务/日程多端实验工程：pnpm monorepo，含 Web（Vue 3 + Vite）、Electron 桌面壳、Capacitor 移动端壳、共享包与 FastAPI 后端。
@@ -82,3 +83,6 @@ pnpm dist:win
 ## CI
 
 推送至 `main` / `master` 或对这些分支的 Pull Request 会触发 [.github/workflows/ci.yml](.github/workflows/ci.yml)：Web 构建与校验、API 的 Ruff / pytest / 冒烟脚本。
+=======
+# TaskTick
+>>>>>>> 2b33a185fad2d540f8ec96fa5608b14f78c117cd
