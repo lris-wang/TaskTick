@@ -166,10 +166,14 @@ def _run_migrations() -> None:
     migrations_path = os.path.join(base_dir, "alembic_migrations")
     if not os.path.isdir(migrations_path):
         print(f"[WARN] alembic_migrations not found at {migrations_path}, using create_all instead")
+        from sqlalchemy import create_engine
         from app.models.base import Base
-        from app.database import engine
-        # Use the sync engine from the async engine
-        Base.metadata.create_all(engine.sync_engine)
+        from app.config import get_settings
+        settings = get_settings()
+        sync_url = settings.database_url.replace("+aiosqlite", "").replace("+asyncpg", "")
+        sync_engine = create_engine(sync_url, echo=False)
+        Base.metadata.create_all(sync_engine)
+        sync_engine.dispose()
         return
     alembic_cfg = alembic.config.Config(os.path.join(base_dir, "alembic.ini"))
     alembic_cfg.set_main_option("script_location", migrations_path)
