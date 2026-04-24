@@ -16,6 +16,17 @@ import { useSyncStore } from "./sync";
 
 const STORAGE_KEY = "tasktick.local.tasks.v1";
 const STORAGE_KEY_PROJECTS = "tasktick.local.projects.v1";
+const STORAGE_KEY_BUILTIN_VIEW = "tasktick.local.builtinView.v1";
+
+function getInitialBuiltinView(): BuiltinView {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_BUILTIN_VIEW);
+    if (saved && ["today", "planned", "engaged", "next", "all", "completed", "inbox"].includes(saved)) {
+      return saved as BuiltinView;
+    }
+  } catch { /* ignore */ }
+  return "all";
+}
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -62,7 +73,7 @@ export const useTaskStore = defineStore("task", {
     /** Search query for filtering tasks */
     searchText: "",
     /** Active built-in view */
-    activeBuiltinView: "all" as BuiltinView,
+    activeBuiltinView: getInitialBuiltinView(),
   }),
 
   getters: {
@@ -138,9 +149,7 @@ export const useTaskStore = defineStore("task", {
             return dueCalendarKey(t.dueAt) !== null;
           }
           case "engaged": {
-            if (t.completed) return false;
-            const hasSubtasks = state.tasks.some((st) => st.parentId === t.id && !st.deletedAt);
-            return hasSubtasks || t.repeatRule != null;
+            return !t.completed;
           }
           case "next": {
             if (t.completed) return false;
@@ -271,6 +280,9 @@ export const useTaskStore = defineStore("task", {
     /** Select a built-in view */
     selectBuiltinView(view: BuiltinView): void {
       this.activeBuiltinView = view;
+      try {
+        localStorage.setItem(STORAGE_KEY_BUILTIN_VIEW, view);
+      } catch { /* ignore */ }
     },
 
     /** Toggle task completion (alias for toggleTaskComplete) */

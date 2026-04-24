@@ -31,6 +31,9 @@ import {
   NButtonGroup,
 } from "naive-ui";
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 import { useTaskStore } from "../stores/task";
 import { useScheduleStore } from "../stores/schedule";
@@ -75,11 +78,16 @@ watch([viewType, viewDay], () => {
   }
 });
 
-const MONTH_NAMES = [
-  "一月", "二月", "三月", "四月", "五月", "六月",
-  "七月", "八月", "九月", "十月", "十一月", "十二月",
-];
-const DAY_NAMES = ["日", "一", "二", "三", "四", "五", "六"];
+const MONTH_NAMES = computed(() => [
+  t("calendar.january"), t("calendar.february"), t("calendar.march"),
+  t("calendar.april"), t("calendar.may"), t("calendar.june"),
+  t("calendar.july"), t("calendar.august"), t("calendar.september"),
+  t("calendar.october"), t("calendar.november"), t("calendar.december"),
+]);
+const DAY_NAMES = computed(() => [
+  t("calendar.sun"), t("calendar.mon"), t("calendar.tue"),
+  t("calendar.wed"), t("calendar.thu"), t("calendar.fri"), t("calendar.sat"),
+]);
 
 // ---- 日历网格数据 ----
 interface DayCell {
@@ -224,7 +232,7 @@ async function downloadIcal() {
     const res = await fetch(`${BASE}/api/v1/sync/export-ical`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-    if (!res.ok) { message.error("导出失败"); return; }
+    if (!res.ok) { message.error(t("export.exportFailed")); return; }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -235,16 +243,24 @@ async function downloadIcal() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch {
-    message.error("导出失败");
+    message.error(t("export.exportFailed"));
   }
 }
 
 const viewDateLabel = computed(() => {
+  const monthName = MONTH_NAMES.value[viewMonth.value];
   if (viewType.value === "day") {
-    return `${viewYear.value}年 ${MONTH_NAMES[viewMonth.value]} ${viewDay.value}日`;
+    return `${viewYear.value} ${monthName} ${viewDay.value}`;
   }
-  return `${viewYear.value}年 ${MONTH_NAMES[viewMonth.value]}`;
+  return `${viewYear.value} ${monthName}`;
 });
+
+const PRIORITY_LABELS = computed(() => [
+  "",
+  t("calendar.priorityLow"),
+  t("calendar.priorityMedium"),
+  t("calendar.priorityHigh"),
+]);
 
 // ---- Week view data ----
 interface WeekDayCell {
@@ -275,7 +291,7 @@ const weekCells = computed<WeekDayCell[]>(() => {
       key,
       isToday: key === todayKey,
       isCurrentMonth: d.getMonth() === viewMonth.value,
-      dayOfWeek: DAY_NAMES[i],
+      dayOfWeek: DAY_NAMES.value[i],
       tasks: tasksByDate.value.get(key) ?? [],
       schedules: scheduleStore.schedulesByDate(key),
       lunar: getLunarInfo(d),
@@ -363,9 +379,9 @@ async function confirmDeleteProject() {
   if (!pendingDeleteProjectId.value) return;
   const ok = await store.deleteProject(pendingDeleteProjectId.value);
   if (!ok) {
-    message.error("删除失败");
+    message.error(t("project.deleteFailed"));
   } else {
-    message.success("已删除分类");
+    message.success(t("project.deleteSuccess"));
     // If deleted project was selected, clear selection
     if (formProjectId.value === pendingDeleteProjectId.value) {
       const alive = store.projects.filter((p) => !p.deletedAt);
@@ -402,7 +418,7 @@ function openDayModal(date: Date) {
 async function submitDaySchedule() {
   const title = scheduleTitle.value.trim();
   if (!title) {
-    message.warning("请填写日程标题");
+    message.warning(t("calendar.fillScheduleTitle"));
     return;
   }
   if (!selectedDate.value || scheduleStartAt.value === null) return;
@@ -413,10 +429,10 @@ async function submitDaySchedule() {
     endAt: scheduleEndAt.value ? new Date(scheduleEndAt.value).toISOString() : null,
   });
   if (!ok) {
-    message.error("创建失败");
+    message.error(t("common.createFailed"));
     return;
   }
-  message.success("已创建日程");
+  message.success(t("calendar.scheduleCreated"));
   scheduleTitle.value = "";
   scheduleStartAt.value = selectedDate.value.getTime();
   scheduleEndAt.value = null;
@@ -426,7 +442,7 @@ async function submitDaySchedule() {
 async function submitDayTask() {
   const title = formTitle.value.trim();
   if (!title) {
-    message.warning("请填写任务标题");
+    message.warning(t("task.enterContent"));
     return;
   }
   if (!selectedDate.value) return;
@@ -441,10 +457,10 @@ async function submitDayTask() {
     projectIds: formProjectId.value ? [formProjectId.value] : [],
   });
   if (!ok) {
-    message.error("创建失败");
+    message.error(t("task.createFailed"));
     return;
   }
-  message.success("已创建任务");
+  message.success(t("task.createSuccess"));
   showDayModal.value = false;
 }
 
@@ -476,21 +492,21 @@ function priorityColor(p: number): string {
     <div class="cal-header">
       <NSpace align="center" :size="12">
         <NButtonGroup size="small">
-          <NButton :type="viewType === 'month' ? 'primary' : 'default'" @click="viewType = 'month'">月</NButton>
-          <NButton :type="viewType === 'week' ? 'primary' : 'default'" @click="viewType = 'week'">周</NButton>
-          <NButton :type="viewType === 'day' ? 'primary' : 'default'" @click="viewType = 'day'">日</NButton>
+          <NButton :type="viewType === 'month' ? 'primary' : 'default'" @click="viewType = 'month'">{{ t("calendar.month") }}</NButton>
+          <NButton :type="viewType === 'week' ? 'primary' : 'default'" @click="viewType = 'week'">{{ t("calendar.week") }}</NButton>
+          <NButton :type="viewType === 'day' ? 'primary' : 'default'" @click="viewType = 'day'">{{ t("calendar.day") }}</NButton>
         </NButtonGroup>
         <NText strong style="font-size: 16px">{{ viewDateLabel }}</NText>
-        <NButton size="small" quaternary @click="goToday">今天</NButton>
+        <NButton size="small" quaternary @click="goToday">{{ t("calendar.today") }}</NButton>
       </NSpace>
       <NSpace :size="8">
-        <NButton v-if="isMonthView" size="small" quaternary @click="prevMonth">‹ 上月</NButton>
-        <NButton v-if="isMonthView" size="small" quaternary @click="nextMonth">下月 ›</NButton>
-        <NButton v-if="isWeekView" size="small" quaternary @click="prevWeek">‹ 上周</NButton>
-        <NButton v-if="isWeekView" size="small" quaternary @click="nextWeek">下周 ›</NButton>
-        <NButton v-if="isDayView" size="small" quaternary @click="prevDay">‹ 前日</NButton>
-        <NButton v-if="isDayView" size="small" quaternary @click="nextDay">后日 ›</NButton>
-        <NButton size="small" quaternary type="default" @click="downloadIcal">📥 导出iCal</NButton>
+        <NButton v-if="isMonthView" size="small" quaternary @click="prevMonth">‹ {{ t("calendar.previousMonth") }}</NButton>
+        <NButton v-if="isMonthView" size="small" quaternary @click="nextMonth">{{ t("calendar.nextMonth") }} ›</NButton>
+        <NButton v-if="isWeekView" size="small" quaternary @click="prevWeek">‹ {{ t("calendar.previousWeek") }}</NButton>
+        <NButton v-if="isWeekView" size="small" quaternary @click="nextWeek">{{ t("calendar.nextWeek") }} ›</NButton>
+        <NButton v-if="isDayView" size="small" quaternary @click="prevDay">‹ {{ t("calendar.previousDay") }}</NButton>
+        <NButton v-if="isDayView" size="small" quaternary @click="nextDay">{{ t("calendar.nextDay") }} ›</NButton>
+        <NButton size="small" quaternary type="default" @click="downloadIcal">📥 {{ t("calendar.exportICal") }}</NButton>
       </NSpace>
     </div>
     </div>
@@ -539,7 +555,7 @@ function priorityColor(p: number): string {
               {{ t.title }}
             </div>
             <div v-if="cell.tasks.length > 3" class="cal-task-overflow">
-              +{{ cell.tasks.length - 3 }} 更多
+              +{{ cell.tasks.length - 3 }} {{ t("calendar.more") }}
             </div>
             <div
               v-for="s in cell.schedules.slice(0, 2)"
@@ -551,7 +567,7 @@ function priorityColor(p: number): string {
               🗓 {{ s.title }}
             </div>
             <div v-if="cell.schedules.length > 2" class="cal-task-overflow">
-              +{{ cell.schedules.length - 2 }} 日程
+              +{{ cell.schedules.length - 2 }} {{ t("calendar.schedule") }}
             </div>
           </template>
         </div>
@@ -602,7 +618,7 @@ function priorityColor(p: number): string {
             {{ t.title }}
           </div>
           <div v-if="cell.tasks.length > 4" class="week-task-overflow">
-            +{{ cell.tasks.length - 4 }} 更多
+            +{{ cell.tasks.length - 4 }} {{ t("calendar.more") }}
           </div>
           <div
             v-for="s in cell.schedules.slice(0, 2)"
@@ -664,33 +680,33 @@ function priorityColor(p: number): string {
     <!-- 选中日期的任务列表（侧边/弹窗） -->
     <NModal
       v-model:show="showDayModal"
-      :title="selectedDate ? `${selectedDate.getMonth()+1}月${selectedDate.getDate()}日 任务与日程` : ''"
+      :title="selectedDate ? `${selectedDate.getMonth()+1}/${selectedDate.getDate()} ${t('calendar.taskAndScheduleFor')}` : ''"
       style="width: min(440px, 90vw)"
     >
       <NSpace vertical :size="12" style="width: 100%">
         <!-- 已有任务 -->
         <div v-if="selectedDateTasks.length > 0" class="day-task-list">
           <div
-            v-for="t in selectedDateTasks"
-            :key="t.id"
+            v-for="taskItem in selectedDateTasks"
+            :key="taskItem.id"
             class="day-task-row"
           >
             <NCheckbox
-              :checked="t.completed"
-              @update:checked="() => store.toggleComplete(t.id)"
+              :checked="taskItem.completed"
+              @update:checked="() => store.toggleComplete(taskItem.id)"
             />
             <NText
               class="day-task-title"
-              :style="{ textDecoration: t.completed ? 'line-through' : 'none', opacity: t.completed ? 0.5 : 1 }"
+              :style="{ textDecoration: taskItem.completed ? 'line-through' : 'none', opacity: taskItem.completed ? 0.5 : 1 }"
             >
-              {{ t.title }}
+              {{ taskItem.title }}
             </NText>
-            <NText v-if="t.priority > 0" depth="3" style="font-size:12px">
-              {{ ["","低","中","高"][t.priority] }}
+            <NText v-if="taskItem.priority > 0" depth="3" style="font-size:12px">
+              {{ PRIORITY_LABELS[taskItem.priority] }}
             </NText>
           </div>
         </div>
-        <NText v-else depth="3" style="font-size:13px">暂无任务</NText>
+        <NText v-else depth="3" style="font-size:13px">{{ t("calendar.noTasks") }}</NText>
 
         <!-- 已有日程 -->
         <div v-if="selectedDateSchedules.length > 0" class="day-task-list">
@@ -706,7 +722,7 @@ function priorityColor(p: number): string {
             </NText>
           </div>
         </div>
-        <NText v-else-if="selectedDateTasks.length > 0" depth="3" style="font-size:13px">暂无日程</NText>
+        <NText v-else-if="selectedDateTasks.length > 0" depth="3" style="font-size:13px">{{ t("calendar.noSchedules") }}</NText>
 
         <NDivider style="margin: 4px 0" />
 
@@ -714,24 +730,24 @@ function priorityColor(p: number): string {
         <NSelect
           v-model:value="formProjectId"
           :options="projectSelectOptions"
-          placeholder="选择分类"
+          :placeholder="t('calendar.selectProject')"
           clearable
           size="small"
           style="width: 100%; margin-bottom: 6px"
         />
         <NInput
           v-model:value="formTitle"
-          placeholder="快速添加任务，回车确认"
+          :placeholder="t('calendar.quickAddPlaceholder')"
           size="small"
           @keydown.enter.prevent="submitDayTask"
         />
         <NSpace style="margin-top: 6px">
-          <NButton type="primary" size="small" @click="submitDayTask">添加任务</NButton>
+          <NButton type="primary" size="small" @click="submitDayTask">{{ t("calendar.addTask") }}</NButton>
           <NButton size="small" @click="showScheduleForm = !showScheduleForm">
-            {{ showScheduleForm ? '取消' : '+ 添加日程' }}
+            {{ showScheduleForm ? t('common.cancel') : '+ ' + t('calendar.addSchedule') }}
           </NButton>
           <NButton size="small" quaternary @click="showProjectManage = !showProjectManage">
-            {{ showProjectManage ? '收起分类' : '管理分类' }}
+            {{ showProjectManage ? t('calendar.collapseCategories') : t('calendar.manageCategories') }}
           </NButton>
         </NSpace>
 
@@ -745,15 +761,15 @@ function priorityColor(p: number): string {
               class="project-manage-row"
             >
               <NText style="flex: 1; font-size: 13px">{{ p.name }}</NText>
-              <NTag v-if="p.builtIn" size="small" round :bordered="false" type="default">默认</NTag>
+              <NTag v-if="p.builtIn" size="small" round :bordered="false" type="default">{{ t("calendar.default") }}</NTag>
               <NPopconfirm
                 v-if="isCustomProject(p.id)"
                 @positive-click="confirmDeleteProject"
               >
                 <template #trigger>
-                  <NButton size="tiny" quaternary type="error">删除</NButton>
+                  <NButton size="tiny" quaternary type="error">{{ t("calendar.delete") }}</NButton>
                 </template>
-                确定删除「{{ p.name }}」？
+                {{ t("calendar.confirmDelete") }}「{{ p.name }}」？
               </NPopconfirm>
             </div>
           </div>
@@ -764,10 +780,10 @@ function priorityColor(p: number): string {
           <NDivider style="margin: 4px 0" />
           <NInput
             v-model:value="scheduleTitle"
-            placeholder="日程标题"
+            :placeholder="t('calendar.scheduleTitlePlaceholder')"
           />
           <NSpace>
-            <NText depth="3" style="font-size:12px">开始</NText>
+            <NText depth="3" style="font-size:12px">{{ t("calendar.start") }}</NText>
             <NDatePicker
               v-model:value="scheduleStartAt"
               type="datetime"
@@ -776,7 +792,7 @@ function priorityColor(p: number): string {
             />
           </NSpace>
           <NSpace>
-            <NText depth="3" style="font-size:12px">结束</NText>
+            <NText depth="3" style="font-size:12px">{{ t("calendar.end") }}</NText>
             <NDatePicker
               v-model:value="scheduleEndAt"
               type="datetime"
@@ -784,7 +800,7 @@ function priorityColor(p: number): string {
               style="width: 220px"
             />
           </NSpace>
-          <NButton type="primary" size="small" @click="submitDaySchedule">确认添加日程</NButton>
+          <NButton type="primary" size="small" @click="submitDaySchedule">{{ t("calendar.confirmAddSchedule") }}</NButton>
         </template>
       </NSpace>
     </NModal>

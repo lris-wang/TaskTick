@@ -67,19 +67,26 @@ export function getLocale(): string {
   return i18n.global.locale.value;
 }
 
-export const SUPPORTED_LOCALES = [
-  { label: "简体中文", value: "zh" },
-  { label: "English", value: "en" },
-  { label: "日本語", value: "ja" },
-  { label: "한국어", value: "ko" },
-  { label: "Español", value: "es" },
-  { label: "Français", value: "fr" },
-  { label: "Deutsch", value: "de" },
-  { label: "Português", value: "pt" },
-  { label: "Русский", value: "ru" },
-  { label: "العربية", value: "ar" },
-  { label: "हिन्दी", value: "hi" },
-  { label: "ไทย", value: "th" },
-  { label: "Tiếng Việt", value: "vi" },
-  { label: "Bahasa Indonesia", value: "id" },
-];
+const LOCALE_KEYS = [
+  { key: "zh", nameKey: "localeNameZh" },
+  { key: "en", nameKey: "localeNameEn" },
+  { key: "ja", nameKey: "localeNameJa" },
+  { key: "ko", nameKey: "localeNameKo" },
+  { key: "es", nameKey: "localeNameEs" },
+  { key: "fr", nameKey: "localeNameFr" },
+  { key: "de", nameKey: "localeNameDe" },
+  { key: "pt", nameKey: "localeNamePt" },
+  { key: "ru", nameKey: "localeNameRu" },
+  { key: "ar", nameKey: "localeNameAr" },
+  { key: "hi", nameKey: "localeNameHi" },
+  { key: "th", nameKey: "localeNameTh" },
+  { key: "vi", nameKey: "localeNameVi" },
+  { key: "id", nameKey: "localeNameId" },
+] as const;
+
+export function getSupportedLocales(): Array<{ label: string; value: string }> {
+  return LOCALE_KEYS.map(({ key, nameKey }) => ({
+    label: i18n.global.t(`settings.${nameKey}`),
+    value: key,
+  }));
+}

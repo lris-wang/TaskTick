@@ -260,7 +260,11 @@ function confirmCustomDuration() {
 }
 
 /** Outer nav: which panel is active */
-const activeNav = ref<"list" | "search" | "habits" | "pomodoro" | "stats" | "notes" | "settings" | "trash">("list");
+const NAV_STORAGE_KEY = "tasktick.activeNav";
+type NavValue = "list" | "search" | "habits" | "pomodoro" | "stats" | "notes" | "settings" | "trash";
+const savedNav = localStorage.getItem(NAV_STORAGE_KEY) as NavValue | null;
+const activeNav = ref<NavValue>(savedNav ?? "list");
+watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
 
 
 /** Sidebar module definitions */
@@ -2949,7 +2953,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                       'heatmap-cell-high': day.count > 5,
                       'heatmap-cell-future': day.count === -1,
                     }"
-                    :title="day.date ? `${day.date}: ${day.count}次` : ''"
+                    :title="day.date ? `${day.date}: ${day.count}${t('habit.checkInCount')}` : ''"
                   ></div>
                 </div>
               </div>
@@ -2981,7 +2985,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 <div class="habit-info">
                   <span class="habit-name" :style="{ color: habit.color || '#18a0ff' }">{{ habit.name }}</span>
                   <span v-if="habitStore.streakByHabitId(habit.id) > 1" class="habit-streak">
-                    🔥 {{ habitStore.streakByHabitId(habit.id) }}天
+                    🔥 {{ habitStore.streakByHabitId(habit.id) }}{{ t('habit.daysUnit') }}
                   </span>
                 </div>
                 <div class="habit-freq">
@@ -3014,7 +3018,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 <div class="habit-info">
                   <span class="habit-name" :style="{ color: habit.color || '#18a0ff' }">{{ habit.name }}</span>
                   <span v-if="habitStore.streakByHabitId(habit.id) > 0" class="habit-streak">
-                    🔥 {{ habitStore.streakByHabitId(habit.id) }}天
+                    🔥 {{ habitStore.streakByHabitId(habit.id) }}{{ t('habit.daysUnit') }}
                   </span>
                 </div>
                 <div class="habit-actions">
@@ -3709,7 +3713,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
         <NButton quaternary @click="openBlankFormFromNl">{{ t('task.nlSkipBlank') }}</NButton>
         <NSpace>
           <NButton @click="showNlModal = false">{{ t('common.cancel') }}</NButton>
-          <NButton type="primary" @click="parseNaturalLanguageAndOpenForm">{{ t('task.nlParseAndFill') || 'Parse and Fill' }}</NButton>
+          <NButton type="primary" @click="parseNaturalLanguageAndOpenForm">{{ t('task.nlParseAndFill') }}</NButton>
         </NSpace>
       </NSpace>
     </template>
@@ -3935,7 +3939,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
           </div>
         </NSpace>
       </NFormItem>
-      <NFormItem label="位置提醒">
+      <NFormItem :label="t('task.locationReminder')">
         <NSpace vertical :size="8" style="width: 100%">
           <NButton size="small" dashed @click="openAddLocationReminder">
             + {{ t('task.addLocationReminder') || '添加位置提醒' }}
@@ -3947,15 +3951,15 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               class="location-reminder-item"
             >
               <NTag :type="reminder.enabled ? 'success' : 'default'" size="small">
-                {{ reminder.reminderType === "arrival" ? "到达" : "离开" }}
+                {{ reminder.reminderType === "arrival" ? t('task.arrival') : t('task.departure') }}
               </NTag>
               <NText depth="2" style="margin-left: 6px">{{ reminder.locationName }}</NText>
               <NText depth="3" style="margin-left: 4px; font-size: 12px">
                 ({{ reminder.latitude!.toFixed(4) }}, {{ reminder.longitude!.toFixed(4) }})
               </NText>
               <NSpace style="margin-left: auto">
-                <NButton size="tiny" quaternary @click="openEditLocationReminder(idx)">编辑</NButton>
-                <NButton size="tiny" quaternary type="error" @click="removeLocationReminder(idx)">删除</NButton>
+                <NButton size="tiny" quaternary @click="openEditLocationReminder(idx)">{{ t('common.edit') }}</NButton>
+                <NButton size="tiny" quaternary type="error" @click="removeLocationReminder(idx)">{{ t('common.delete') }}</NButton>
               </NSpace>
             </div>
           </div>
@@ -3978,8 +3982,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
             </NButton>
           </NUpload>
           <NText depth="3" style="font-size: 12px; line-height: 1.45">
-            支持一次多选；选择后会在下方「上传」并回显。单文件不超过 {{ formatFileSize(MAX_ATTACHMENT_BYTES) }}，最多
-            {{ MAX_ATTACHMENTS_PER_TASK }} 个；内容保存在本机浏览器（Data URL）。
+            {{ t('task.attachmentHint', { size: formatFileSize(MAX_ATTACHMENT_BYTES), max: MAX_ATTACHMENTS_PER_TASK }) }}
           </NText>
 
           <div v-for="p in pendingAttachments" :key="p.id" class="att-line att-line--pending">
@@ -3987,15 +3990,15 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               <NSpin size="small" />
               <div class="att-line-body">
                 <NText class="att-line-name">{{ p.name }}</NText>
-                <NText depth="3" class="att-line-size">{{ formatFileSize(p.size) }} · 处理中</NText>
+                <NText depth="3" class="att-line-size">{{ formatFileSize(p.size) }} · {{ t('task.processing') }}</NText>
                 <NProgress type="line" :percentage="p.progress" :show-indicator="false" processing />
               </div>
             </template>
             <template v-else>
-              <NText type="error" style="flex-shrink: 0">{{ p.error ?? "失败" }}</NText>
+              <NText type="error" style="flex-shrink: 0">{{ p.error ?? t('common.failed') }}</NText>
               <div class="att-line-body">
                 <NText class="att-line-name">{{ p.name }}</NText>
-                <NText depth="3" class="att-line-size">请移除后重新选择</NText>
+                <NText depth="3" class="att-line-size">{{ t('task.removeAndReselect') }}</NText>
               </div>
               <NButton size="tiny" quaternary type="error" @click="removePendingAttachment(p.id)">{{ t('common.remove') }}</NButton>
             </template>
@@ -4009,8 +4012,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 <div class="att-card-type">{{ getAttachmentVisual(a).typeLabel }} · {{ formatFileSize(a.size) }}</div>
               </div>
               <div class="att-card-actions att-card-actions--form">
-                <NButton v-if="canPreviewAttachment(a)" size="tiny" secondary @click.stop="openPreview(a)">预览</NButton>
-                <NButton size="tiny" secondary @click.stop="downloadAttachment(a)">下载</NButton>
+                <NButton v-if="canPreviewAttachment(a)" size="tiny" secondary @click.stop="openPreview(a)">{{ t('common.preview') }}</NButton>
+                <NButton size="tiny" secondary @click.stop="downloadAttachment(a)">{{ t('common.download') }}</NButton>
                 <NButton size="tiny" quaternary type="error" @click.stop="removeFormAttachment(a.id)">{{ t('common.remove') }}</NButton>
               </div>
             </div>
@@ -4070,7 +4073,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
       <!-- 保存为模板 -->
       <NSpace :size="8" align="center">
         <NInput v-model:value="batchSubtaskTemplateName" :placeholder="t('task.templateNamePlaceholder') || '模板名称（可选）'" style="width: 160px" />
-        <NButton size="small" @click="saveSubtaskTemplateFromText">保存为模板</NButton>
+        <NButton size="small" @click="saveSubtaskTemplateFromText">{{ t('task.saveAsTemplate') }}</NButton>
       </NSpace>
     </NSpace>
     <template #footer>
@@ -4084,7 +4087,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   <NModal
     v-model:show="showPreviewModal"
     preset="card"
-    :title="previewAttachment?.name ?? '预览'"
+    :title="previewAttachment?.name ?? t('common.preview')"
     style="width: min(960px, 96vw)"
     :mask-closable="true"
   >
@@ -4108,7 +4111,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
     </template>
     <template #footer>
       <NSpace justify="space-between" style="width: 100%">
-        <NButton v-if="previewAttachment" tertiary @click="downloadAttachment(previewAttachment)">下载</NButton>
+        <NButton v-if="previewAttachment" tertiary @click="downloadAttachment(previewAttachment)">{{ t('common.download') }}</NButton>
         <NButton type="primary" @click="showPreviewModal = false">{{ t('common.close') }}</NButton>
       </NSpace>
     </template>
@@ -4151,7 +4154,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               quaternary
               @click.stop="openEditProject(p)"
             >
-              编辑
+              {{ t('common.edit') }}
             </NButton>
             <NButton
               v-if="isCustomProject(p)"
@@ -4160,14 +4163,14 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               type="error"
               @click.stop="askDeleteProject(p)"
             >
-              删除
+              {{ t('common.delete') }}
             </NButton>
           </div>
         </div>
       </div>
     </NScrollbar>
     <NDivider style="margin: 14px 0 12px" />
-    <NText depth="3" style="display: block; margin-bottom: 8px; font-size: 13px">添加自定义分类</NText>
+    <NText depth="3" style="display: block; margin-bottom: 8px; font-size: 13px">{{ t('project.addCustomProject') }}</NText>
     <NSpace style="width: 100%">
       <NInput
         v-model:value="newCategoryName"
@@ -4181,7 +4184,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
     </NSpace>
     <template #footer>
       <NSpace justify="space-between">
-        <NButton @click="openExportCsvModal">📥 导出CSV</NButton>
+        <NButton @click="openExportCsvModal">📥 {{ t('project.exportCsv') }}</NButton>
         <NButton type="primary" @click="showCategoryManageModal = false">{{ t('common.confirm') }}</NButton>
       </NSpace>
     </template>
@@ -4208,13 +4211,13 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
       />
       <NSpace align="center" :size="8">
         <NCheckbox v-model:checked="exportCsvIncludeCompleted" />
-        <NText depth="3" style="font-size: 13px">包含已完成任务</NText>
+        <NText depth="3" style="font-size: 13px">{{ t('export.includeCompleted') }}</NText>
       </NSpace>
     </NSpace>
     <template #footer>
       <NSpace justify="end">
         <NButton @click="showExportCsvModal = false">{{ t('common.cancel') }}</NButton>
-        <NButton type="primary" :loading="exportCsvLoading" @click="doExportCsv">导出</NButton>
+        <NButton type="primary" :loading="exportCsvLoading" @click="doExportCsv">{{ t('common.export') }}</NButton>
       </NSpace>
     </template>
   </NModal>
@@ -4250,8 +4253,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
           <template #unchecked>{{ t('project.notArchived') || 'Not Archived' }}</template>
         </NSwitch>
         <NSwitch v-model:value="projectModalMuted">
-          <template #checked>已静音</template>
-          <template #unchecked>未静音</template>
+          <template #checked>{{ t('project.muted') }}</template>
+          <template #unchecked>{{ t('project.notMuted') }}</template>
         </NSwitch>
       </NSpace>
     </NFormItem>
@@ -4320,8 +4323,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
           />
           <NText class="tag-row-name">{{ tag.name }}</NText>
           <NSpace :size="4">
-            <NButton size="tiny" quaternary @click="openEditTag(tag)">编辑</NButton>
-            <NButton size="tiny" quaternary type="error" @click="askDeleteTag(tag)">删除</NButton>
+            <NButton size="tiny" quaternary @click="openEditTag(tag)">{{ t('common.edit') }}</NButton>
+            <NButton size="tiny" quaternary type="error" @click="askDeleteTag(tag)">{{ t('common.delete') }}</NButton>
           </NSpace>
         </div>
         <NText v-if="sidebarTags.length === 0" depth="3" style="padding: 8px 0">
@@ -4330,7 +4333,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
       </NSpace>
     </NScrollbar>
     <NDivider style="margin: 12px 0" />
-    <NText depth="3" style="display: block; margin-bottom: 8px; font-size: 13px">新建标签</NText>
+    <NText depth="3" style="display: block; margin-bottom: 8px; font-size: 13px">{{ t('tag.createNew') }}</NText>
     <NSpace vertical :size="8" style="width: 100%">
       <NInput
         v-model:value="newTagName"
@@ -4349,7 +4352,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
             class="color-swatch"
             :class="{ 'color-swatch--active': newTagColor === color }"
             :style="{ background: color }"
-            :aria-label="`选择颜色 ${color}`"
+            :aria-label="`${t('tag.selectColor')} ${color}`"
             @click="newTagColor = color"
           />
         </NSpace>
@@ -4358,7 +4361,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
     </NSpace>
     <template #footer>
       <NSpace justify="end">
-        <NButton type="primary" @click="showTagManageModal = false">完成</NButton>
+        <NButton type="primary" @click="showTagManageModal = false">{{ t('common.done') }}</NButton>
       </NSpace>
     </template>
   </NModal>
@@ -4388,7 +4391,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
             class="color-swatch"
             :class="{ 'color-swatch--active': editingTagColor === color }"
             :style="{ background: color }"
-            :aria-label="`选择颜色 ${color}`"
+            :aria-label="`${t('tag.selectColor')} ${color}`"
             @click="editingTagColor = color"
           />
         </NSpace>
@@ -4498,7 +4501,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
     <template #footer>
       <NSpace justify="end">
         <NButton @click="showLocationReminderModal = false">{{ t('common.cancel') }}</NButton>
-        <NButton type="primary" @click="saveLocationReminder">保存</NButton>
+        <NButton type="primary" @click="saveLocationReminder">{{ t('common.save') }}</NButton>
       </NSpace>
     </template>
   </NModal>
@@ -4555,7 +4558,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
         <NSpace vertical :size="4">
           <NSpace :size="4">
             <NCheckbox
-              v-for="(day, idx) in ['一','二','三','四','五','六','日']"
+              v-for="(day, idx) in WEEKDAY_OPTIONS"
               :key="idx"
               :checked="habitFormWeekDays.includes(idx)"
               @update:checked="(checked: boolean) => {
@@ -4563,12 +4566,12 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 else habitFormWeekDays = habitFormWeekDays.filter(d => d !== idx);
               }"
             >
-              {{ t('habit.week') || '周' }}{{ day }}
+              {{ t('habit.week') }}{{ day }}
             </NCheckbox>
           </NSpace>
         </NSpace>
       </NFormItem>
-      <NFormItem label="颜色">
+      <NFormItem :label="t('tag.color')">
         <NSpace :size="4">
           <span
             v-for="color in PRESET_COLORS.slice(0, 8)"
@@ -4728,7 +4731,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   <!-- 创建团队对话框 -->
   <NModal v-model:show="showCreateTeamDialog">
     <NCard :title="t('team.create') as string" style="width: 400px" :bordered="false">
-      <NFormItem label="团队名称">
+      <NFormItem :label="t('team.name')">
         <NInput v-model:value="newTeamName" :placeholder="t('team.namePlaceholder') || '输入团队名称'" @keydown.enter.prevent="handleCreateTeam" />
       </NFormItem>
       <template #footer>

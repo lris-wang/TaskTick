@@ -1,7 +1,8 @@
 1<script setup lang="ts">
 import { NButton, NCard, NDivider, NForm, NFormItem, NInput, NLayoutSider, NMenu, NSwitch, NText, NUpload, NSelect, useMessage } from "naive-ui";
-import { ref, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 import type { Task, Project, Tag, Habit, HabitLog, Team, TeamMember } from "@tasktick/shared";
 import { changeUsername, changePassword, getMe, changeAvatar, exportIcal } from "../api";
@@ -12,13 +13,18 @@ import { useHabitStore } from "../stores/habit";
 import { useTeamStore } from "../stores/team";
 import { useTheme, COLOR_SCHEMES } from "../composables/useTheme";
 import { usePushNotification } from "../composables/usePushNotification";
-import { getLocale, setLocale, SUPPORTED_LOCALES } from "../locales";
+import { getLocale, setLocale, getSupportedLocales, i18n } from "../locales";
 
 const router = useRouter();
 const auth = useAuthStore();
 const message = useMessage();
+const { t } = useI18n();
 
-const activeMenu = ref<string>("personal");
+const SETTINGS_MENU_KEY = "tasktick.settings.activeMenu";
+const savedMenu = localStorage.getItem(SETTINGS_MENU_KEY);
+const validMenus = ["personal", "language", "theme", "notification", "backup"];
+const activeMenu = ref<string>(savedMenu && validMenus.includes(savedMenu) ? savedMenu : "personal");
+watch(activeMenu, (val) => localStorage.setItem(SETTINGS_MENU_KEY, val));
 
 // Push notification state
 const pushSupported = !!(navigator.serviceWorker && window.PushManager);
@@ -29,14 +35,14 @@ async function togglePush(current: boolean) {
   if (current) {
     await pushComposable.unsubscribe();
     pushSubscribed.value = false;
-    message.success("已关闭后台推送");
+    message.success(t('settings.pushDisabled'));
   } else {
     const ok = await pushComposable.subscribe();
     if (ok) {
       pushSubscribed.value = true;
-      message.success("已开启后台推送");
+      message.success(t('settings.pushEnabled'));
     } else {
-      message.error("开启推送失败，请检查通知权限");
+      message.error(t('settings.pushEnableFailed'));
     }
   }
 }
@@ -49,26 +55,26 @@ onMounted(async () => {
 // Theme / color scheme
 const { themeMode, activeSchemeId } = useTheme();
 
-// 强调色选项
+// Accent color options
 const ACCENT_COLORS = [
-  { name: "蓝色", value: "#18a0ff" },
-  { name: "紫色", value: "#8b5cf6" },
-  { name: "绿色", value: "#22c55e" },
-  { name: "橙色", value: "#f97316" },
-  { name: "粉色", value: "#ec4899" },
-  { name: "青色", value: "#14b8a6" },
-  { name: "红色", value: "#ef4444" },
-  { name: "黄色", value: "#eab308" },
+  { name: t('settings.colorBlue'), value: "#18a0ff" },
+  { name: t('settings.colorPurple'), value: "#8b5cf6" },
+  { name: t('settings.colorGreen'), value: "#22c55e" },
+  { name: t('settings.colorOrange'), value: "#f97316" },
+  { name: t('settings.colorPink'), value: "#ec4899" },
+  { name: t('settings.colorCyan'), value: "#14b8a6" },
+  { name: t('settings.colorRed'), value: "#ef4444" },
+  { name: t('settings.colorYellow'), value: "#eab308" },
 ];
 const activeAccentColor = ref(auth.themeAccentColor || "#18a0ff");
 
-// 界面密度
+// Interface density
 const densityMode = ref<"compact" | "comfortable">("comfortable");
 
-// 动画效果
+// Animation effects
 const animationEnabled = ref(true);
 
-// 圆角风格
+// Border radius style
 const borderRadius = ref<"none" | "small" | "medium" | "large">("medium");
 
 // ─── Backup / Restore ────────────────────────────────────────────────────────
@@ -118,10 +124,10 @@ async function onExport() {
     a.download = `tasktick-backup-${dateStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    message.success("数据已导出");
+    message.success(t('settings.exportSuccess'));
   } catch (e) {
     console.error(e);
-    message.error("导出失败");
+    message.error(t('settings.exportFailed'));
   } finally {
     exportLoading.value = false;
   }
@@ -131,10 +137,10 @@ async function onExportIcal() {
   exportLoading.value = true;
   try {
     await exportIcal();
-    message.success("iCalendar 已导出");
+    message.success(t('settings.exportSuccess'));
   } catch (e) {
     console.error(e);
-    message.error("导出失败");
+    message.error(t('settings.exportFailed'));
   } finally {
     exportLoading.value = false;
   }
@@ -213,18 +219,18 @@ async function onImportPreview(file: File): Promise<void> {
     try {
       parsed = JSON.parse(text);
     } catch {
-      message.warning("文件格式错误，非有效 JSON");
+      message.warning(t('settings.fileFormatError'));
       return;
     }
     if (!isBackupData(parsed)) {
-      message.warning("文件格式错误，不是有效的 TaskTick 备份文件");
+      message.warning(t('settings.notValidBackup'));
       return;
     }
     pendingBackup.value = parsed as BackupData;
     importPreview.value = calcImportPreview(parsed as BackupData);
     showImportConfirm.value = true;
   } catch {
-    message.error("读取文件失败");
+    message.error(t('settings.readFileFailed'));
   }
 }
 
@@ -321,10 +327,10 @@ async function onConfirmImport() {
       teams: bd.teams?.length ?? 0,
     };
     importResult.value = result;
-    message.success(`导入完成：${result.tasks} 任务 / ${result.projects} 分类 / ${result.tags} 标签 / ${result.habits} 习惯 / ${result.teams} 团队`);
+    message.success(t('settings.importSuccess', { tasks: result.tasks, projects: result.projects, tags: result.tags, habits: result.habits, teams: result.teams }));
   } catch (e) {
     console.error(e);
-    message.error("导入失败");
+    message.error(t('settings.importFailed'));
   } finally {
     importLoading.value = false;
     importFileName.value = "";
@@ -420,15 +426,15 @@ async function onChangeAvatar(file: File) {
         currentAvatarUrl.value = data.avatar_url;
         auth.avatarUrl = data.avatar_url;
         auth.persist();
-        message.success("头像已更新");
+        message.success(t('settings.avatarUpdated'));
       } else {
-        message.error("头像更新失败");
+        message.error(t('settings.avatarUpdateFailed'));
       }
       avatarLoading.value = false;
     };
     reader.readAsDataURL(file);
   } catch {
-    message.error("头像更新失败");
+    message.error(t('settings.avatarUpdateFailed'));
     avatarLoading.value = false;
   }
 }
@@ -445,20 +451,20 @@ async function onChangeUsername() {
   usernameError.value = "";
   usernameSuccess.value = "";
   const u = newUsername.value.trim();
-  if (!u) { usernameError.value = "用户名不能为空"; return; }
-  if (u === currentUsername.value) { usernameError.value = "与当前用户名相同"; return; }
+  if (!u) { usernameError.value = t('settings.usernameRequired'); return; }
+  if (u === currentUsername.value) { usernameError.value = t('settings.sameAsCurrent'); return; }
 
   usernameLoading.value = true;
   try {
     const data = await changeUsername(u);
     if (!data) {
-      usernameError.value = "修改失败，用户名可能被占用";
+      usernameError.value = t('settings.usernameTaken');
       return;
     }
     currentUsername.value = data.username;
     auth.username = data.username;
     auth.persist();
-    usernameSuccess.value = "用户名已更新";
+    usernameSuccess.value = t('settings.usernameUpdated');
   } finally {
     usernameLoading.value = false;
   }
@@ -467,19 +473,19 @@ async function onChangeUsername() {
 async function onChangePassword() {
   passwordError.value = "";
   passwordSuccess.value = "";
-  if (oldPassword.value.length < 4) { passwordError.value = "旧密码至少4位"; return; }
-  if (newPassword.value.length < 4) { passwordError.value = "新密码至少4位"; return; }
-  if (newPassword.value !== confirmPassword.value) { passwordError.value = "两次输入的新密码不一致"; return; }
-  if (oldPassword.value === newPassword.value) { passwordError.value = "新密码不能与旧密码相同"; return; }
+  if (oldPassword.value.length < 4) { passwordError.value = t('settings.passwordMinLength'); return; }
+  if (newPassword.value.length < 4) { passwordError.value = t('settings.passwordMinLength'); return; }
+  if (newPassword.value !== confirmPassword.value) { passwordError.value = t('settings.passwordsMismatch'); return; }
+  if (oldPassword.value === newPassword.value) { passwordError.value = t('settings.sameAsOld'); return; }
 
   passwordLoading.value = true;
   try {
     const ok = await changePassword(oldPassword.value, newPassword.value);
     if (!ok) {
-      passwordError.value = "旧密码错误";
+      passwordError.value = t('settings.oldPasswordError');
       return;
     }
-    passwordSuccess.value = "密码已更新";
+    passwordSuccess.value = t('settings.passwordUpdated');
     oldPassword.value = "";
     newPassword.value = "";
     confirmPassword.value = "";
@@ -493,20 +499,47 @@ function onSwitchAccount() {
   router.push("/login");
 }
 
-const menuOptions = [
-  { key: "personal", label: "个人信息" },
-  { key: "language", label: "语言" },
-  { key: "theme", label: "主题" },
-  { key: "notification", label: "通知设置" },
-  { key: "backup", label: "备份与恢复" },
-];
+const menuOptions = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  i18n.global.locale.value; // reactive dependency
+  return [
+    { key: "personal", label: t('settings.personal') },
+    { key: "language", label: t('settings.language') },
+    { key: "theme", label: t('settings.theme') },
+    { key: "notification", label: t('settings.notifications') },
+    { key: "backup", label: t('settings.backup') },
+  ];
+});
 
 // Language settings
 const currentLocale = ref(getLocale());
 
+const localeOptions = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  i18n.global.locale.value; // reactive dependency
+  return getSupportedLocales();
+});
+
 function onLocaleChange(locale: string) {
   setLocale(locale);
-  message.success(locale === "zh" ? "已切换到中文" : locale === "en" ? "Switched to English" : locale === "ja" ? "日本語に切り替えました" : "Language changed");
+  currentLocale.value = locale;
+  const keyMap: Record<string, string> = {
+    zh: 'settings.localeNameZh',
+    en: 'settings.localeNameEn',
+    ja: 'settings.localeNameJa',
+    ko: 'settings.localeNameKo',
+    es: 'settings.localeNameEs',
+    fr: 'settings.localeNameFr',
+    de: 'settings.localeNameDe',
+    pt: 'settings.localeNamePt',
+    ru: 'settings.localeNameRu',
+    ar: 'settings.localeNameAr',
+    hi: 'settings.localeNameHi',
+    th: 'settings.localeNameTh',
+    vi: 'settings.localeNameVi',
+    id: 'settings.localeNameId',
+  };
+  message.success(`${t(keyMap[locale] || locale)} ${t('common.success')}`);
 }
 </script>
 
@@ -514,9 +547,9 @@ function onLocaleChange(locale: string) {
   <div class="settings-page">
     <div class="settings-header">
       <NButton text style="color:#18a0ff;font-size:13px" @click="router.back()">
-        ← 返回
+        ← {{ t('common.back') }}
       </NButton>
-      <NText strong style="font-size:18px">设置</NText>
+      <NText strong style="font-size:18px">{{ t('settings.title') }}</NText>
       <div style="width:60px" />
     </div>
 
@@ -541,23 +574,23 @@ function onLocaleChange(locale: string) {
         <template v-if="activeMenu === 'personal'">
           <NCard class="settings-card" :bordered="false" size="large">
             <template #header>
-              <NText strong style="font-size:15px">个人信息</NText>
+              <NText strong style="font-size:15px">{{ t('settings.personal') }}</NText>
             </template>
 
             <div v-if="loadingUser" class="loading-area">
-              <NText depth="3">加载中…</NText>
+              <NText depth="3">{{ t('common.loading') }}</NText>
             </div>
 
             <template v-else>
               <!-- Avatar -->
               <div class="avatar-section">
-                <NText depth="3" style="font-size:13px;margin-bottom:8px;display:block">头像</NText>
+                <NText depth="3" style="font-size:13px;margin-bottom:8px;display:block">{{ t('settings.avatar') }}</NText>
                 <div class="avatar-row">
                   <div class="avatar-preview">
                     <img
                       v-if="currentAvatarUrl"
                       :src="currentAvatarUrl"
-                      alt="头像"
+                      :alt="t('settings.avatar')"
                       class="avatar-img"
                     />
                     <div v-else class="avatar-placeholder">
@@ -570,7 +603,7 @@ function onLocaleChange(locale: string) {
                     @change="handleAvatarChange"
                   >
                     <NButton size="small" :loading="avatarLoading">
-                      修改头像
+                      {{ t('settings.changeAvatar') }}
                     </NButton>
                   </NUpload>
                 </div>
@@ -580,7 +613,7 @@ function onLocaleChange(locale: string) {
 
               <!-- Email (read-only) -->
               <div class="info-row">
-                <NText depth="3" style="font-size:13px">邮箱</NText>
+                <NText depth="3" style="font-size:13px">{{ t('auth.email') }}</NText>
                 <NText style="font-size:14px">{{ currentEmail }}</NText>
               </div>
 
@@ -588,10 +621,10 @@ function onLocaleChange(locale: string) {
 
               <!-- Change username -->
               <NForm @submit.prevent="onChangeUsername">
-                <NFormItem label="用户名">
+                <NFormItem :label="t('auth.username')">
                   <NInput
                     v-model:value="newUsername"
-                    placeholder="显示名称"
+                    :placeholder="t('settings.usernamePlaceholder')"
                     :disabled="usernameLoading"
                     size="large"
                   />
@@ -599,7 +632,7 @@ function onLocaleChange(locale: string) {
                 <NText v-if="usernameError" type="error" style="font-size:13px;display:block;margin-bottom:8px">{{ usernameError }}</NText>
                 <NText v-if="usernameSuccess" type="success" style="font-size:13px;display:block;margin-bottom:8px">{{ usernameSuccess }}</NText>
                 <NButton type="primary" size="small" :loading="usernameLoading" attr-type="submit">
-                  保存用户名
+                  {{ t('settings.saveUsername') }}
                 </NButton>
               </NForm>
             </template>
@@ -607,38 +640,38 @@ function onLocaleChange(locale: string) {
 
           <NCard class="settings-card" :bordered="false" size="large" style="margin-top:16px">
             <template #header>
-              <NText strong style="font-size:15px">修改密码</NText>
+              <NText strong style="font-size:15px">{{ t('settings.changePassword') }}</NText>
             </template>
 
             <NForm @submit.prevent="onChangePassword">
-              <NFormItem label="旧密码">
+              <NFormItem :label="t('settings.oldPassword')">
                 <NInput
                   v-model:value="oldPassword"
                   type="password"
                   show-password-on="click"
-                  placeholder="请输入旧密码"
+                  :placeholder="t('settings.oldPassword')"
                   autocomplete="current-password"
                   :disabled="passwordLoading"
                   size="large"
                 />
               </NFormItem>
-              <NFormItem label="新密码">
+              <NFormItem :label="t('settings.newPassword')">
                 <NInput
                   v-model:value="newPassword"
                   type="password"
                   show-password-on="click"
-                  placeholder="至少4位"
+                  :placeholder="t('settings.passwordMinLength')"
                   autocomplete="new-password"
                   :disabled="passwordLoading"
                   size="large"
                 />
               </NFormItem>
-              <NFormItem label="确认新密码">
+              <NFormItem :label="t('settings.confirmPassword')">
                 <NInput
                   v-model:value="confirmPassword"
                   type="password"
                   show-password-on="click"
-                  placeholder="再次输入新密码"
+                  :placeholder="t('settings.confirmPassword')"
                   autocomplete="new-password"
                   :disabled="passwordLoading"
                   size="large"
@@ -647,20 +680,20 @@ function onLocaleChange(locale: string) {
               <NText v-if="passwordError" type="error" style="font-size:13px;display:block;margin-bottom:8px">{{ passwordError }}</NText>
               <NText v-if="passwordSuccess" type="success" style="font-size:13px;display:block;margin-bottom:8px">{{ passwordSuccess }}</NText>
               <NButton type="primary" size="small" :loading="passwordLoading" attr-type="submit">
-                修改密码
+                {{ t('settings.savePassword') }}
               </NButton>
             </NForm>
           </NCard>
 
           <NCard class="settings-card" :bordered="false" size="large" style="margin-top:16px">
             <template #header>
-              <NText strong style="font-size:15px">切换账号</NText>
+              <NText strong style="font-size:15px">{{ t('settings.switchAccount') }}</NText>
             </template>
             <NText depth="3" style="font-size:13px;display:block;margin-bottom:12px">
-              退出当前账号，使用其他邮箱登录。
+              {{ t('settings.logoutHint') }}
             </NText>
             <NButton type="warning" @click="onSwitchAccount">
-              切换账号
+              {{ t('settings.switchAccount') }}
             </NButton>
           </NCard>
         </template>
@@ -669,16 +702,16 @@ function onLocaleChange(locale: string) {
         <template v-else-if="activeMenu === 'language'">
           <NCard class="settings-card" :bordered="false" size="large">
             <template #header>
-              <NText strong style="font-size:15px">语言设置</NText>
+              <NText strong style="font-size:15px">{{ t('settings.languageSettings') }}</NText>
             </template>
             <NText depth="3" style="font-size:13px;display:block;margin-bottom:16px;line-height:1.6">
-              选择界面显示语言。
+              {{ t('settings.selectLanguage') }}
             </NText>
 
-            <NFormItem label="界面语言">
+            <NFormItem :label="t('settings.interfaceLanguage')">
               <NSelect
                 v-model:value="currentLocale"
-                :options="SUPPORTED_LOCALES"
+                :options="localeOptions"
                 style="width: 200px"
                 @update:value="onLocaleChange"
               />
@@ -690,15 +723,15 @@ function onLocaleChange(locale: string) {
         <template v-else-if="activeMenu === 'theme'">
           <NCard class="settings-card" :bordered="false" size="large">
             <template #header>
-              <NText strong style="font-size:15px">主题设置</NText>
+              <NText strong style="font-size:15px">{{ t('settings.themeSettings') }}</NText>
             </template>
             <NText depth="3" style="font-size:13px;display:block;margin-bottom:16px;line-height:1.6">
-              选择深色或浅色模式，并搭配喜欢的主题颜色。
+              {{ t('settings.themeHint') }}
             </NText>
 
             <!-- 模式切换：深色 / 浅色 -->
             <NText strong depth="3" style="font-size:12px;display:block;margin-bottom:10px;letter-spacing:0.05em;text-transform:uppercase">
-              模式
+              {{ t('settings.mode') }}
             </NText>
             <div class="mode-toggle">
               <button
@@ -707,7 +740,7 @@ function onLocaleChange(locale: string) {
                 @click="themeMode = 'dark'; auth.persist()"
               >
                 <span class="mode-icon">🌙</span>
-                <NText :depth="themeMode === 'dark' ? 1 : 3" style="font-size:13px">深色</NText>
+                <NText :depth="themeMode === 'dark' ? 1 : 3" style="font-size:13px">{{ t('settings.dark') }}</NText>
               </button>
               <button
                 class="mode-btn"
@@ -715,7 +748,7 @@ function onLocaleChange(locale: string) {
                 @click="themeMode = 'light'; auth.persist()"
               >
                 <span class="mode-icon">☀️</span>
-                <NText :depth="themeMode === 'light' ? 1 : 3" style="font-size:13px">浅色</NText>
+                <NText :depth="themeMode === 'light' ? 1 : 3" style="font-size:13px">{{ t('settings.light') }}</NText>
               </button>
             </div>
 
@@ -723,7 +756,7 @@ function onLocaleChange(locale: string) {
 
             <!-- 颜色色系 -->
             <NText strong depth="3" style="font-size:12px;display:block;margin-bottom:10px;letter-spacing:0.05em;text-transform:uppercase">
-              基础色系
+              {{ t('settings.baseColorScheme') }}
             </NText>
             <div class="scheme-grid">
               <button
@@ -775,14 +808,14 @@ function onLocaleChange(locale: string) {
               </button>
             </div>
             <NText depth="3" style="font-size:11px;display:block;margin-top:6px">
-              当前：{{ ACCENT_COLORS.find(c => c.value === activeAccentColor)?.name || '默认' }}
+              {{ t('settings.currentColor', { name: ACCENT_COLORS.find(c => c.value === activeAccentColor)?.name || t('settings.defaultColor') }) }}
             </NText>
 
             <NDivider style="margin:16px 0" />
 
             <!-- 界面密度 -->
             <NText strong depth="3" style="font-size:12px;display:block;margin-bottom:10px;letter-spacing:0.05em;text-transform:uppercase">
-              界面密度
+              {{ t('settings.density') }}
             </NText>
             <div class="mode-toggle">
               <button
@@ -790,14 +823,14 @@ function onLocaleChange(locale: string) {
                 :class="{ 'mode-btn--active': densityMode === 'compact' }"
                 @click="densityMode = 'compact'"
               >
-                <NText :depth="densityMode === 'compact' ? 1 : 3" style="font-size:13px">紧凑</NText>
+                <NText :depth="densityMode === 'compact' ? 1 : 3" style="font-size:13px">{{ t('settings.compact') }}</NText>
               </button>
               <button
                 class="mode-btn"
                 :class="{ 'mode-btn--active': densityMode === 'comfortable' }"
                 @click="densityMode = 'comfortable'"
               >
-                <NText :depth="densityMode === 'comfortable' ? 1 : 3" style="font-size:13px">舒适</NText>
+                <NText :depth="densityMode === 'comfortable' ? 1 : 3" style="font-size:13px">{{ t('settings.comfortable') }}</NText>
               </button>
             </div>
 
@@ -806,8 +839,8 @@ function onLocaleChange(locale: string) {
             <!-- 动画效果 -->
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <NText strong depth="3" style="font-size:13px;display:block">动画效果</NText>
-                <NText depth="3" style="font-size:12px">开启页面过渡动画</NText>
+                <NText strong depth="3" style="font-size:13px;display:block">{{ t('settings.animation') }}</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.animation') }}</NText>
               </div>
               <NSwitch v-model:value="animationEnabled" />
             </div>
@@ -816,7 +849,7 @@ function onLocaleChange(locale: string) {
 
             <!-- 圆角风格 -->
             <NText strong depth="3" style="font-size:12px;display:block;margin-bottom:10px;letter-spacing:0.05em;text-transform:uppercase">
-              圆角风格
+              {{ t('settings.borderRadius') }}
             </NText>
             <div class="mode-toggle">
               <button
@@ -824,28 +857,28 @@ function onLocaleChange(locale: string) {
                 :class="{ 'mode-btn--active': borderRadius === 'none' }"
                 @click="borderRadius = 'none'"
               >
-                <NText :depth="borderRadius === 'none' ? 1 : 3" style="font-size:13px">无</NText>
+                <NText :depth="borderRadius === 'none' ? 1 : 3" style="font-size:13px">{{ t('settings.none') }}</NText>
               </button>
               <button
                 class="mode-btn"
                 :class="{ 'mode-btn--active': borderRadius === 'small' }"
                 @click="borderRadius = 'small'"
               >
-                <NText :depth="borderRadius === 'small' ? 1 : 3" style="font-size:13px">小</NText>
+                <NText :depth="borderRadius === 'small' ? 1 : 3" style="font-size:13px">{{ t('settings.small') }}</NText>
               </button>
               <button
                 class="mode-btn"
                 :class="{ 'mode-btn--active': borderRadius === 'medium' }"
                 @click="borderRadius = 'medium'"
               >
-                <NText :depth="borderRadius === 'medium' ? 1 : 3" style="font-size:13px">中</NText>
+                <NText :depth="borderRadius === 'medium' ? 1 : 3" style="font-size:13px">{{ t('settings.medium') }}</NText>
               </button>
               <button
                 class="mode-btn"
                 :class="{ 'mode-btn--active': borderRadius === 'large' }"
                 @click="borderRadius = 'large'"
               >
-                <NText :depth="borderRadius === 'large' ? 1 : 3" style="font-size:13px">大</NText>
+                <NText :depth="borderRadius === 'large' ? 1 : 3" style="font-size:13px">{{ t('settings.large') }}</NText>
               </button>
             </div>
           </NCard>
@@ -855,7 +888,7 @@ function onLocaleChange(locale: string) {
         <template v-else-if="activeMenu === 'notification'">
           <NCard class="settings-card" :bordered="false" size="large">
             <template #header>
-              <NText strong style="font-size:15px">通知设置</NText>
+              <NText strong style="font-size:15px">{{ t('settings.notifications') }}</NText>
             </template>
             <NSpace vertical :size="16">
               <div>
@@ -865,15 +898,15 @@ function onLocaleChange(locale: string) {
                     :disabled="!pushSupported"
                     @update:value="void togglePush(pushSubscribed)"
                   />
-                  <NText>{{ pushSubscribed ? "后台推送已开启" : "后台推送已关闭" }}</NText>
+                  <NText>{{ pushSubscribed ? t('settings.pushEnabled') : t('settings.pushDisabled') }}</NText>
                 </NSpace>
                 <NText depth="3" style="font-size:12px;display:block;margin-top:4px">
                   {{
                     !pushSupported
-                      ? "您的浏览器不支持 Web Push 推送通知"
+                      ? t('settings.browserNotSupport')
                       : pushSubscribed
-                        ? "浏览器关闭后仍可收到任务到期提醒"
-                        : "开启后，即使浏览器关闭，任务到期时也会收到系统通知"
+                        ? t('settings.pushEnabledDesc')
+                        : t('settings.pushDisabledDesc')
                   }}
                 </NText>
               </div>
@@ -884,10 +917,10 @@ function onLocaleChange(locale: string) {
                     :value="auth.desktopNotifyEnabled"
                     @update:value="void auth.toggleDesktopNotify()"
                   />
-                  <NText>{{ auth.desktopNotifyEnabled ? "内置提醒已开启" : "内置提醒已关闭" }}</NText>
+                  <NText>{{ auth.desktopNotifyEnabled ? t('settings.desktopNotifyEnabled') : t('settings.desktopNotifyDisabled') }}</NText>
                 </NSpace>
                 <NText depth="3" style="font-size:12px;display:block;margin-top:4px">
-                  开启后，打开浏览器时任务到期会在页面内弹出通知
+                  {{ t('settings.desktopNotifyHint') }}
                 </NText>
               </div>
             </NSpace>
@@ -898,48 +931,48 @@ function onLocaleChange(locale: string) {
         <template v-else-if="activeMenu === 'backup'">
           <NCard class="settings-card" :bordered="false" size="large">
             <template #header>
-              <NText strong style="font-size:15px">导出数据</NText>
+              <NText strong style="font-size:15px">{{ t('settings.exportData') }}</NText>
             </template>
             <NText depth="3" style="font-size:13px;display:block;margin-bottom:12px;line-height:1.6">
-              将所有任务、分类和标签导出为 JSON 文件。可用于备份或在另一台设备上恢复。
+              {{ t('settings.exportDataHint') }}
             </NText>
             <!-- 本地数据统计 -->
             <div class="backup-stats">
               <div class="backup-stat">
                 <NText class="backup-stat-num">{{ taskStore.tasks.filter(t => !t.deletedAt).length }}</NText>
-                <NText depth="3" style="font-size:12px">任务</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.task') }}</NText>
               </div>
               <div class="backup-stat">
                 <NText class="backup-stat-num">{{ taskStore.projects.filter(p => !p.deletedAt).length }}</NText>
-                <NText depth="3" style="font-size:12px">分类</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.project') }}</NText>
               </div>
               <div class="backup-stat">
                 <NText class="backup-stat-num">{{ tagStore.tags.filter(t => !t.deletedAt).length }}</NText>
-                <NText depth="3" style="font-size:12px">标签</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.tag') }}</NText>
               </div>
               <div class="backup-stat">
                 <NText class="backup-stat-num">{{ habitStore.activeHabits.length }}</NText>
-                <NText depth="3" style="font-size:12px">习惯</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.habit') }}</NText>
               </div>
               <div class="backup-stat">
                 <NText class="backup-stat-num">{{ teamStore.teams.length }}</NText>
-                <NText depth="3" style="font-size:12px">团队</NText>
+                <NText depth="3" style="font-size:12px">{{ t('settings.team') }}</NText>
               </div>
             </div>
             <NButton type="primary" :loading="exportLoading" @click="onExport">
-              导出为 JSON 文件
+              {{ t('settings.exportAsJson') }}
             </NButton>
             <NButton style="margin-top:8px" :loading="exportLoading" @click="onExportIcal">
-              导出为 iCalendar (.ics)
+              {{ t('settings.exportAsIcal') }}
             </NButton>
           </NCard>
 
           <NCard class="settings-card" :bordered="false" size="large" style="margin-top:16px">
             <template #header>
-              <NText strong style="font-size:15px">导入数据</NText>
+              <NText strong style="font-size:15px">{{ t('settings.importData') }}</NText>
             </template>
             <NText depth="3" style="font-size:13px;display:block;margin-bottom:12px;line-height:1.6">
-              从备份文件导入数据。导入前可以预览数据变更，选择合并或覆盖模式。
+              {{ t('settings.importDataHint') }}
             </NText>
 
             <!-- 导入模式选择 -->
@@ -949,16 +982,16 @@ function onLocaleChange(locale: string) {
                 :class="{ 'import-mode-btn--active': importMode === 'merge' }"
                 @click="importMode = 'merge'"
               >
-                <NText :depth="importMode === 'merge' ? 1 : 3" style="font-size:13px">智能合并</NText>
-                <NText depth="3" style="font-size:11px">以最新修改时间合并，保留本地更新</NText>
+                <NText :depth="importMode === 'merge' ? 1 : 3" style="font-size:13px">{{ t('settings.smartMerge') }}</NText>
+                <NText depth="3" style="font-size:11px">{{ t('settings.smartMergeHint') }}</NText>
               </button>
               <button
                 class="import-mode-btn"
                 :class="{ 'import-mode-btn--active': importMode === 'replace' }"
                 @click="importMode = 'replace'"
               >
-                <NText :depth="importMode === 'replace' ? 1 : 3" style="font-size:13px">完全覆盖</NText>
-                <NText depth="3" style="font-size:11px">用备份文件完全替换本地数据</NText>
+                <NText :depth="importMode === 'replace' ? 1 : 3" style="font-size:13px">{{ t('settings.replaceAll') }}</NText>
+                <NText depth="3" style="font-size:11px">{{ t('settings.replaceAllHint') }}</NText>
               </button>
             </div>
 
@@ -970,16 +1003,16 @@ function onLocaleChange(locale: string) {
               @change="onFileInputChange"
             />
             <NButton :loading="importLoading" style="margin-top:12px" @click="triggerFileInput">
-              选择备份文件
+              {{ t('settings.chooseBackupFile') }}
             </NButton>
             <NText v-if="importFileName" depth="3" style="font-size:12px;display:block;margin-top:8px">
-              已选择：{{ importFileName }}
+              {{ t('settings.selected', { name: importFileName }) }}
             </NText>
 
             <!-- 导入结果 -->
             <div v-if="importResult" class="import-result">
               <NText style="font-size:13px;color:#22c55e">
-                ✓ 导入成功：{{ importResult.tasks }} 任务 / {{ importResult.projects }} 分类 / {{ importResult.tags }} 标签
+                ✓ {{ t('settings.importSuccess', { tasks: importResult.tasks, projects: importResult.projects, tags: importResult.tags, habits: importResult.habits, teams: importResult.teams }) }}
               </NText>
             </div>
           </NCard>
@@ -988,67 +1021,67 @@ function onLocaleChange(locale: string) {
           <NModal
             v-model:show="showImportConfirm"
             preset="card"
-            title="导入预览"
+            :title="t('settings.importPreview')"
             style="width: min(480px, 95vw)"
           >
             <NSpace vertical :size="10" style="width:100%">
               <NText depth="3" style="font-size:13px">
-                文件：{{ importFileName }}
+                {{ t('settings.selected', { name: importFileName }) }}
               </NText>
 
               <template v-if="importPreview">
                 <!-- 任务预览 -->
                 <div class="preview-section">
-                  <NText strong style="font-size:14px">任务</NText>
+                  <NText strong style="font-size:14px">{{ t('settings.task') }}</NText>
                   <div class="preview-stats">
-                    <span class="preview-badge preview-badge--add">+{{ importPreview.tasks.added }} 新增</span>
-                    <span class="preview-badge preview-badge--update">~{{ importPreview.tasks.updated }} 更新</span>
-                    <span class="preview-badge preview-badge--same">={{ importPreview.tasks.unchanged }} 不变</span>
-                    <NText depth="3" style="font-size:12px;margin-left:4px">共 {{ importPreview.tasks.total }} 条</NText>
+                    <span class="preview-badge preview-badge--add">+{{ importPreview.tasks.added }}</span>
+                    <span class="preview-badge preview-badge--update">~{{ importPreview.tasks.updated }}</span>
+                    <span class="preview-badge preview-badge--same">={{ importPreview.tasks.unchanged }}</span>
+                    <NText depth="3" style="font-size:12px;margin-left:4px">{{ t('settings.taskCount', { n: importPreview.tasks.total }) }}</NText>
                   </div>
                 </div>
 
                 <!-- 分类预览 -->
                 <div class="preview-section">
-                  <NText strong style="font-size:14px">分类</NText>
+                  <NText strong style="font-size:14px">{{ t('settings.project') }}</NText>
                   <div class="preview-stats">
-                    <span class="preview-badge preview-badge--add">+{{ importPreview.projects.added }} 新增</span>
-                    <span class="preview-badge preview-badge--update">~{{ importPreview.projects.updated }} 更新</span>
-                    <span class="preview-badge preview-badge--same">={{ importPreview.projects.unchanged }} 不变</span>
-                    <NText depth="3" style="font-size:12px;margin-left:4px">共 {{ importPreview.projects.total }} 条</NText>
+                    <span class="preview-badge preview-badge--add">+{{ importPreview.projects.added }}</span>
+                    <span class="preview-badge preview-badge--update">~{{ importPreview.projects.updated }}</span>
+                    <span class="preview-badge preview-badge--same">={{ importPreview.projects.unchanged }}</span>
+                    <NText depth="3" style="font-size:12px;margin-left:4px">{{ t('settings.projectCount', { n: importPreview.projects.total }) }}</NText>
                   </div>
                 </div>
 
                 <!-- 标签预览 -->
                 <div class="preview-section">
-                  <NText strong style="font-size:14px">标签</NText>
+                  <NText strong style="font-size:14px">{{ t('settings.tag') }}</NText>
                   <div class="preview-stats">
-                    <span class="preview-badge preview-badge--add">+{{ importPreview.tags.added }} 新增</span>
-                    <span class="preview-badge preview-badge--update">~{{ importPreview.tags.updated }} 更新</span>
-                    <span class="preview-badge preview-badge--same">={{ importPreview.tags.unchanged }} 不变</span>
-                    <NText depth="3" style="font-size:12px;margin-left:4px">共 {{ importPreview.tags.total }} 条</NText>
+                    <span class="preview-badge preview-badge--add">+{{ importPreview.tags.added }}</span>
+                    <span class="preview-badge preview-badge--update">~{{ importPreview.tags.updated }}</span>
+                    <span class="preview-badge preview-badge--same">={{ importPreview.tags.unchanged }}</span>
+                    <NText depth="3" style="font-size:12px;margin-left:4px">{{ t('settings.tagCount', { n: importPreview.tags.total }) }}</NText>
                   </div>
                 </div>
 
                 <!-- 习惯预览 -->
                 <div v-if="importPreview.habits" class="preview-section">
-                  <NText strong style="font-size:14px">习惯</NText>
+                  <NText strong style="font-size:14px">{{ t('settings.habit') }}</NText>
                   <div class="preview-stats">
-                    <span class="preview-badge preview-badge--add">+{{ importPreview.habits.added }} 新增</span>
-                    <span class="preview-badge preview-badge--update">~{{ importPreview.habits.updated }} 更新</span>
-                    <span class="preview-badge preview-badge--same">={{ importPreview.habits.unchanged }} 不变</span>
-                    <NText depth="3" style="font-size:12px;margin-left:4px">共 {{ importPreview.habits.total }} 条</NText>
+                    <span class="preview-badge preview-badge--add">+{{ importPreview.habits.added }}</span>
+                    <span class="preview-badge preview-badge--update">~{{ importPreview.habits.updated }}</span>
+                    <span class="preview-badge preview-badge--same">={{ importPreview.habits.unchanged }}</span>
+                    <NText depth="3" style="font-size:12px;margin-left:4px">{{ t('settings.habitCount', { n: importPreview.habits.total }) }}</NText>
                   </div>
                 </div>
 
                 <!-- 团队预览 -->
                 <div v-if="importPreview.teams" class="preview-section">
-                  <NText strong style="font-size:14px">团队</NText>
+                  <NText strong style="font-size:14px">{{ t('settings.team') }}</NText>
                   <div class="preview-stats">
-                    <span class="preview-badge preview-badge--add">+{{ importPreview.teams.added }} 新增</span>
-                    <span class="preview-badge preview-badge--update">~{{ importPreview.teams.updated }} 更新</span>
-                    <span class="preview-badge preview-badge--same">={{ importPreview.teams.unchanged }} 不变</span>
-                    <NText depth="3" style="font-size:12px;margin-left:4px">共 {{ importPreview.teams.total }} 条</NText>
+                    <span class="preview-badge preview-badge--add">+{{ importPreview.teams.added }}</span>
+                    <span class="preview-badge preview-badge--update">~{{ importPreview.teams.updated }}</span>
+                    <span class="preview-badge preview-badge--same">={{ importPreview.teams.unchanged }}</span>
+                    <NText depth="3" style="font-size:12px;margin-left:4px">{{ t('settings.teamCount', { n: importPreview.teams.total }) }}</NText>
                   </div>
                 </div>
               </template>
@@ -1056,9 +1089,9 @@ function onLocaleChange(locale: string) {
               <NDivider style="margin:4px 0" />
 
               <NSpace>
-                <NButton @click="onCancelImport">取消</NButton>
+                <NButton @click="onCancelImport">{{ t('common.cancel') }}</NButton>
                 <NButton type="primary" :loading="importLoading" @click="onConfirmImport">
-                  确认导入
+                  {{ t('settings.confirmImport') }}
                 </NButton>
               </NSpace>
             </NSpace>
