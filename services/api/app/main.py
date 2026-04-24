@@ -161,7 +161,11 @@ async def _run_due_notification_scheduler() -> None:
 
 def _run_migrations() -> None:
     """Run pending Alembic migrations on startup."""
-    alembic_cfg = alembic.config.Config("alembic.ini")
+    import os
+    alembic_cfg = alembic.config.Config(
+        "alembic.ini",
+        script_location=os.path.join(os.path.dirname(__file__), "..", "alembic_migrations"),
+    )
     alembic.command.upgrade(alembic_cfg, "head")
 
 
