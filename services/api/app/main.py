@@ -160,11 +160,19 @@ async def _run_due_notification_scheduler() -> None:
 
 
 def _run_migrations() -> None:
-    """Run pending Alembic migrations on startup."""
+    """Run pending Alembic migrations on startup; fall back to create_all if alembic dir missing."""
     import os
     base_dir = os.path.dirname(os.path.dirname(__file__))
+    migrations_path = os.path.join(base_dir, "alembic_migrations")
+    if not os.path.isdir(migrations_path):
+        print(f"[WARN] alembic_migrations not found at {migrations_path}, using create_all instead")
+        from app.models.base import Base
+        from app.database import engine
+        # Use the sync engine from the async engine
+        Base.metadata.create_all(engine.sync_engine)
+        return
     alembic_cfg = alembic.config.Config(os.path.join(base_dir, "alembic.ini"))
-    alembic_cfg.set_main_option("script_location", os.path.join(base_dir, "alembic_migrations"))
+    alembic_cfg.set_main_option("script_location", migrations_path)
     alembic.command.upgrade(alembic_cfg, "head")
 
 
