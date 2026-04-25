@@ -18,8 +18,6 @@ except ImportError:
     _HAS_AIOSMTPLIB = False
     aiosmtplib = None
 
-from app.config import get_settings
-
 # Default retry config
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY = 1.0  # seconds, will double each retry (exponential backoff)
@@ -35,25 +33,18 @@ async def send_email(
 ) -> bool:
     """
     Send an email with retry. Returns True on success, False on all retries exhausted.
-
-    If SMTP is not configured or aiosmtplib is not installed, logs the subject and body
-    to console so verification codes are still usable in development without SMTP.
     """
     if not _HAS_AIOSMTPLIB:
         logger.warning("[email] aiosmtplib not installed, logging email content instead")
         logger.info("[email] To: %s | Subject: %s | Body (truncated): %s", to, subject, html_body[:200])
         return False
 
-    settings = get_settings()
-    host = settings.email_smtp_host or settings.email_smtp_host1
-    port = settings.email_smtp_port or settings.email_smtp_port1 or 587
-    user = settings.email_smtp_user or settings.email_smtp_user1
-    password = settings.email_smtp_password or settings.email_smtp_password1
-    from_addr = settings.email_from or settings.email_from1
-    if not host:
-        logger.warning("[email] SMTP not configured, logging email content instead")
-        logger.info("[email] To: %s | Subject: %s | Body (truncated): %s", to, subject, html_body[:200])
-        return False
+    # Hardcoded Resend SMTP for Render deployment (temporary fix for env var issue)
+    host = "smtp.resend.com"
+    port = 587
+    user = "resend"
+    password = "re_GBNiDoQV_CDTewe7WAr4U71G7Az1k8KSX"
+    from_addr = "TaskTick <noreply@tasktick.com>"
 
     message = MIMEText(html_body, "html", "utf-8")
     message["From"] = from_addr
