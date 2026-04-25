@@ -49,10 +49,15 @@ class Settings(BaseSettings):
 
     # ---- Email (SMTP) ----
     email_smtp_host: str | None = None
+    email_smtp_host1: str | None = None  # fallback for Render env var name with 1
     email_smtp_port: int = 587
+    email_smtp_port1: int | None = None  # fallback
     email_smtp_user: str | None = None
+    email_smtp_user1: str | None = None  # fallback
     email_smtp_password: str | None = None
+    email_smtp_password1: str | None = None  # fallback
     email_from: str = "TaskTick <noreply@tasktick.com>"
+    email_from1: str | None = None  # fallback
     email_verify_code_ttl_seconds: int = 600
 
     # ---- CORS ----

@@ -45,11 +45,11 @@ async def send_email(
         return False
 
     settings = get_settings()
-    host = settings.email_smtp_host or getattr(settings, 'email_smtp_host1', None)
-    port = settings.email_smtp_port or getattr(settings, 'email_smtp_port1', 587)
-    user = settings.email_smtp_user or getattr(settings, 'email_smtp_user1', None)
-    password = settings.email_smtp_password or getattr(settings, 'email_smtp_password1', None)
-    from_addr = settings.email_from or getattr(settings, 'email_from1', None)
+    host = settings.email_smtp_host or settings.email_smtp_host1
+    port = settings.email_smtp_port or settings.email_smtp_port1 or 587
+    user = settings.email_smtp_user or settings.email_smtp_user1
+    password = settings.email_smtp_password or settings.email_smtp_password1
+    from_addr = settings.email_from or settings.email_from1
     if not host:
         logger.warning("[email] SMTP not configured, logging email content instead")
         logger.info("[email] To: %s | Subject: %s | Body (truncated): %s", to, subject, html_body[:200])
