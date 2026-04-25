@@ -225,3 +225,17 @@ app.include_router(notifications.router, prefix="/api/v1")
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+@app.get("/debug/email-config")
+async def debug_email_config() -> dict:
+    settings = get_settings()
+    return {
+        "email_smtp_host": settings.email_smtp_host,
+        "email_smtp_host1": settings.email_smtp_host1,
+        "email_smtp_port": settings.email_smtp_port,
+        "email_smtp_port1": settings.email_smtp_port1,
+        "email_smtp_user": settings.email_smtp_user,
+        "email_smtp_user1": settings.email_smtp_user1,
+        "email_smtp_password_set": bool(settings.email_smtp_password),
+        "email_smtp_password1_set": bool(settings.email_smtp_password1),
+    }
