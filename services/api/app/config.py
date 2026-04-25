@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=None, extra="ignore")
 
     # ---- Database ----
     # 开发默认 SQLite；生产改为 postgresql+asyncpg://user:pass@host:5432/dbname
