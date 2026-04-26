@@ -12,6 +12,7 @@ from app.models.tag import Tag
 from app.models.task import Task
 from app.models.team import Team
 from app.models.team_member import TeamMember
+from app.models.verification_code import VerificationCode
 from app.models.user import User
 
-__all__ = ["User", "ApiToken", "Schedule", "Task", "Project", "ProjectGroup", "Tag", "Team", "TeamMember", "PomodoroSession", "Note", "SmartList", "LocationReminder", "Comment", "PushSubscription"]
+__all__ = ["VerificationCode", "User", "ApiToken", "Schedule", "Task", "Project", "ProjectGroup", "Tag", "Team", "TeamMember", "PomodoroSession", "Note", "SmartList", "LocationReminder", "Comment", "PushSubscription"]
