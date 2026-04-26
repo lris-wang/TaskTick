@@ -17,6 +17,7 @@ import { useSyncStore } from "./sync";
 const STORAGE_KEY = "tasktick.local.tasks.v1";
 const STORAGE_KEY_PROJECTS = "tasktick.local.projects.v1";
 const STORAGE_KEY_BUILTIN_VIEW = "tasktick.local.builtinView.v1";
+const STORAGE_KEY_SELECTED_PROJECT = "tasktick.local.selectedProject.v1";
 
 function getInitialBuiltinView(): BuiltinView {
   try {
@@ -26,6 +27,13 @@ function getInitialBuiltinView(): BuiltinView {
     }
   } catch { /* ignore */ }
   return "all";
+}
+
+function getInitialSelectedProject(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY_SELECTED_PROJECT);
+  } catch { /* ignore */ }
+  return null;
 }
 
 function nowIso(): string {
@@ -69,7 +77,7 @@ export const useTaskStore = defineStore("task", {
     tasks: [] as Task[],
     projects: [] as Project[],
     /** Currently selected project ID (null = All Tasks) */
-    selectedProjectId: null as string | null,
+    selectedProjectId: getInitialSelectedProject() as string | null,
     /** Search query for filtering tasks */
     searchText: "",
     /** Active built-in view */
@@ -476,6 +484,13 @@ export const useTaskStore = defineStore("task", {
     /** Select a project (null = All Tasks) */
     selectProject(id: string | null): void {
       this.selectedProjectId = id;
+      try {
+        if (id) {
+          localStorage.setItem(STORAGE_KEY_SELECTED_PROJECT, id);
+        } else {
+          localStorage.removeItem(STORAGE_KEY_SELECTED_PROJECT);
+        }
+      } catch { /* ignore */ }
     },
 
     /**
