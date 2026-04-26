@@ -1972,7 +1972,7 @@ function handleGroupContextMenuSelect(key: string) {
 }
 
 const groupContextMenuOptions = computed(() => [
-  { label: t('group.createUnderGroup') || 'Create Category Here', key: "create_under_group" },
+  { label: t('group.createCategory') || '创建分类', key: "create_under_group" },
 ]);
 
 /** Tag management helpers */
