@@ -44,7 +44,7 @@ async def send_email(
     port = 587
     user = "resend"
     password = "re_GBNiDoQV_CDTewe7WAr4U71G7Az1k8KSX"
-    from_addr = "TaskTick <noreply@tasktick.com>"
+    from_addr = "TaskTick <noreply@tasktick.asia>"
 
     message = MIMEText(html_body, "html", "utf-8")
     message["From"] = from_addr
@@ -63,7 +63,7 @@ async def send_email(
                 port=port,
                 username=user,
                 password=password,
-                start_tls=(not use_tls),
+                start_tls=not use_tls,
                 use_tls=use_tls,
             )
             logger.info("[email] Sent to %s (attempt %d): %s", to, attempt, subject)
