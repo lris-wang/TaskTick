@@ -292,6 +292,7 @@ export const useTaskStore = defineStore("task", {
     /** Select a built-in view */
     selectBuiltinView(view: BuiltinView): void {
       this.activeBuiltinView = view;
+      this.selectedProjectId = null;
       try {
         localStorage.setItem(STORAGE_KEY_BUILTIN_VIEW, view);
       } catch { /* ignore */ }
