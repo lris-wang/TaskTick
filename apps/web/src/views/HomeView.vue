@@ -609,8 +609,14 @@ function handleCreateDropdown(key: string) {
   if (key === "form") {
     openNaturalLanguageCreate();
   } else if (key === "category") {
+    projectModalEditingId.value = null;
+    projectModalName.value = "";
+    projectModalColor.value = null;
+    projectModalGroupId.value = null;
+    newCategoryName.value = "";
+    newCategoryColor.value = null;
     isCreatingCategory.value = true;
-    selectedProjectId.value = null;
+    showProjectEditModal.value = true;
   } else if (key === "tag") {
     showTagManageModal.value = true;
   }
@@ -622,8 +628,9 @@ async function submitCreateCategory() {
   const groupId = projectModalGroupId.value && projectModalGroupId.value !== "__none__"
     ? projectModalGroupId.value
     : null;
-  await store.addProject(newCategoryName.value.trim(), undefined, teamStore.activeTeamId, groupId);
+  await store.addProject(newCategoryName.value.trim(), newCategoryColor.value ?? undefined, teamStore.activeTeamId, groupId);
   newCategoryName.value = "";
+  newCategoryColor.value = null;
   projectModalGroupId.value = null;
   isCreatingCategory.value = false;
 }
@@ -632,6 +639,7 @@ async function submitCreateCategory() {
 function cancelCreateCategory() {
   isCreatingCategory.value = false;
   newCategoryName.value = "";
+  newCategoryColor.value = null;
   projectModalGroupId.value = null;
 }
 
@@ -1408,6 +1416,7 @@ const listEmpty = computed(
 
 const showCategoryManageModal = ref(false);
 const newCategoryName = ref("");
+const newCategoryColor = ref<string | null>(null);
 const showExportCsvModal = ref(false);
 const exportCsvProjectIds = ref<string[]>([]);
 const exportCsvIncludeCompleted = ref(false);
@@ -1786,6 +1795,9 @@ function openEditProject(p: Project) {
   projectModalMuted.value = p.muted ?? false;
   projectModalGroupId.value = p.groupId ?? "__none__";
   projectModalColor.value = p.groupId ? (groupStore.groupById(p.groupId)?.color ?? null) : null;
+  isCreatingCategory.value = false;
+  newCategoryName.value = "";
+  newCategoryColor.value = null;
   showProjectEditModal.value = true;
 }
 
@@ -1795,21 +1807,37 @@ async function submitProjectEditModal() {
     message.warning(t('project.enterName') || 'Please enter project name');
     return;
   }
-  if (!projectModalEditingId.value) return;
-  const ok = await store.updateProject(projectModalEditingId.value, {
-    name: n,
-    archived: projectModalArchived.value,
-    muted: projectModalMuted.value,
-    groupId: projectModalGroupId.value === "__none__" ? null : projectModalGroupId.value,
-  });
-  if (ok && projectModalGroupId.value && projectModalColor.value !== null) {
-    groupStore.updateGroup(projectModalGroupId.value, { color: projectModalColor.value });
+  if (projectModalEditingId.value) {
+    // Edit existing project
+    const ok = await store.updateProject(projectModalEditingId.value, {
+      name: n,
+      archived: projectModalArchived.value,
+      muted: projectModalMuted.value,
+      groupId: projectModalGroupId.value === "__none__" ? null : projectModalGroupId.value,
+    });
+    if (ok && projectModalGroupId.value && projectModalColor.value !== null) {
+      groupStore.updateGroup(projectModalGroupId.value, { color: projectModalColor.value });
+    }
+    if (!ok) {
+      message.error(t('project.renameFailed') || 'Failed to rename (built-in project cannot be renamed)');
+      return;
+    }
+    message.success(t('project.renameSuccess') || 'Project name updated');
+  } else {
+    // Create new project (from sidebar or group context menu)
+    const groupId = projectModalGroupId.value && projectModalGroupId.value !== "__none__"
+      ? projectModalGroupId.value
+      : null;
+    const id = await store.addProject(n, projectModalColor.value ?? undefined, teamStore.activeTeamId, groupId);
+    if (!id) {
+      message.error(t('common.saveFailed') || 'Save failed');
+      return;
+    }
+    message.success(t('project.addSuccess') || 'Custom project added');
+    newCategoryName.value = "";
+    newCategoryColor.value = null;
+    isCreatingCategory.value = false;
   }
-  if (!ok) {
-    message.error(t('project.renameFailed') || 'Failed to rename (built-in project cannot be renamed)');
-    return;
-  }
-  message.success(t('project.renameSuccess') || 'Project name updated');
   showProjectEditModal.value = false;
 }
 
@@ -1934,21 +1962,17 @@ function onGroupContextMenu(e: MouseEvent, groupId: string) {
 
 function handleGroupContextMenuSelect(key: string) {
   showGroupContextMenu.value = false;
-  if (key === "create_category" && groupContextMenuGroupId.value) {
-    isCreatingCategory.value = true;
-    projectModalGroupId.value = groupContextMenuGroupId.value;
+  if (key === "create_under_group" && groupContextMenuGroupId.value) {
     newCategoryName.value = "";
-  }
-  if (key === "edit_color" && groupContextMenuGroupId.value) {
+    newCategoryColor.value = null;
     projectModalGroupId.value = groupContextMenuGroupId.value;
-    projectModalColor.value = groupStore.groupById(groupContextMenuGroupId.value)?.color ?? null;
+    isCreatingCategory.value = true;
     showProjectEditModal.value = true;
   }
 }
 
 const groupContextMenuOptions = computed(() => [
-  { label: t('group.createCategory') || 'Create Category', key: "create_category" },
-  { label: t('group.editColor') || 'Edit Color', key: "edit_color" },
+  { label: t('group.createUnderGroup') || 'Create Category Here', key: "create_under_group" },
 ]);
 
 /** Tag management helpers */
@@ -2684,6 +2708,21 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @keydown.esc.prevent="cancelCreateCategory"
               autofocus
             />
+            <NSpace :size="4" align="center" style="margin-top: 6px;">
+              <NText depth="3" style="font-size: 11px;">{{ t('tag.color') || 'Color' }}:</NText>
+              <NSpace :size="3">
+                <button
+                  v-for="color in PRESET_COLORS.slice(0, 8)"
+                  :key="color"
+                  type="button"
+                  class="color-swatch"
+                  :class="{ 'color-swatch--active': newCategoryColor === color }"
+                  :style="{ background: color }"
+                  style="width: 14px; height: 14px; border-radius: 50%; cursor: pointer; padding: 0"
+                  @click="newCategoryColor = (newCategoryColor === color ? null : color)"
+                />
+              </NSpace>
+            </NSpace>
             <div class="sidebar-tag-btns" style="margin-top: 8px; padding-left: 0;">
               <NText depth="3" style="font-size: 12px; margin-bottom: 4px; display: block;">{{ t('task.selectTags') }}</NText>
               <div
@@ -2718,6 +2757,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @dragleave="onProjectDragLeave"
               @drop.stop="onProjectDrop(p.id)"
             >
+              <span v-if="p.color" class="project-dot" :style="{ background: p.color }" />
               <span class="sidebar-project-name">{{ p.name }}</span>
               <NButton
                 size="tiny"
@@ -2766,6 +2806,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                   @dragleave="onProjectDragLeave"
                   @drop.stop="onProjectDrop(p.id)"
                 >
+                  <span v-if="p.color" class="project-dot" :style="{ background: p.color }" />
                   <span class="sidebar-project-name">{{ p.name }}</span>
                   <NButton
                     size="tiny"
@@ -2810,7 +2851,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                     class="color-swatch"
                     :class="{ 'color-swatch--active': newProjectGroupColor === color }"
                     :style="{ background: color }"
-                    style="width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; padding: 0"
+                    style="width: 14px; height: 14px; border-radius: 50%; cursor: pointer; padding: 0"
                     @click="newProjectGroupColor = (newProjectGroupColor === color ? null : color)"
                   />
                 </NSpace>
@@ -4999,6 +5040,12 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   cursor: pointer;
   user-select: none;
   transition: background 0.15s;
+}
+.project-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 .sidebar-project-item:hover {
   background: var(--tt-row-hover-bg, rgba(255, 255, 255, 0.06));
