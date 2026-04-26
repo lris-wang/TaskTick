@@ -260,6 +260,10 @@ export const useTaskStore = defineStore("task", {
       const auth = useAuthStore();
       if (auth.isLoggedIn) {
         try {
+          const syncStore = useSyncStore();
+          const hasPendingProjects = syncStore.queue.some(
+            (m) => m.entityType === "project" && m.op === "upsert",
+          );
           const syncData = await syncPull(null);
           if (syncData && syncData.projects.length > 0) {
             this.projects = syncData.projects.map((p) => ({
@@ -273,7 +277,7 @@ export const useTaskStore = defineStore("task", {
               teamId: p.teamId ?? null,
             }));
             migrateLegacyProjectBuiltinFlags(this.projects);
-          } else {
+          } else if (!hasPendingProjects) {
             this.seedDefaultProjects();
           }
           this.persistProjects();
