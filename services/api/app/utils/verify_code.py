@@ -175,6 +175,6 @@ async def get_remaining_ttl(email: str) -> int:
 
 # ---- Compatibility shims for existing callers ----
 
-async def generate_code(email: str, ttl_seconds: int | None = None) -> str:
+def generate_code(email: str, ttl_seconds: int | None = None) -> str:
     """Generate a new code. Does NOT store it — use store_code()."""
     return _generate_code()
