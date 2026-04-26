@@ -1419,8 +1419,10 @@ const projectModalEditingId = ref<string | null>(null);
 const projectModalArchived = ref(false);
 const projectModalMuted = ref(false);
 const projectModalGroupId = ref<string | null>(null);
+const projectModalColor = ref<string | null>(null);
 const isCreatingProjectGroup = ref(false);
 const newProjectGroupName = ref("");
+const newProjectGroupColor = ref<string | null>(null);
 
 const showDeleteProjectModal = ref(false);
 const pendingDeleteProject = ref<Project | null>(null);
@@ -1527,7 +1529,10 @@ const collapsedGroupIds = ref<Set<string>>(new Set());
 
 const projectGroupOptions = computed(() => [
   { label: t('project.noGroup') || 'No Group', value: "__none__" },
-  ...groupStore.visibleGroups.map((g) => ({ label: g.name, value: g.id })),
+  ...groupStore.visibleGroups.map((g) => ({
+    label: (g.color ? `● ${g.name}` : g.name),
+    value: g.id,
+  })),
 ]);
 
 /** Sidebar tags filtered by current team context */
@@ -1780,6 +1785,7 @@ function openEditProject(p: Project) {
   projectModalArchived.value = p.archived ?? false;
   projectModalMuted.value = p.muted ?? false;
   projectModalGroupId.value = p.groupId ?? "__none__";
+  projectModalColor.value = p.groupId ? (groupStore.groupById(p.groupId)?.color ?? null) : null;
   showProjectEditModal.value = true;
 }
 
@@ -1796,6 +1802,9 @@ async function submitProjectEditModal() {
     muted: projectModalMuted.value,
     groupId: projectModalGroupId.value === "__none__" ? null : projectModalGroupId.value,
   });
+  if (ok && projectModalGroupId.value && projectModalColor.value !== null) {
+    groupStore.updateGroup(projectModalGroupId.value, { color: projectModalColor.value });
+  }
   if (!ok) {
     message.error(t('project.renameFailed') || 'Failed to rename (built-in project cannot be renamed)');
     return;
@@ -1823,9 +1832,10 @@ async function submitCreateProjectGroup() {
   const n = newProjectGroupName.value.trim();
   if (!n) return;
   // addGroup already persists locally and enqueues sync mutation — do not enqueue again
-  groupStore.addGroup(n);
+  groupStore.addGroup(n, newProjectGroupColor.value);
   message.success(t('group.createSuccess') || 'Group created');
   newProjectGroupName.value = "";
+  newProjectGroupColor.value = null;
   isCreatingProjectGroup.value = false;
 }
 
@@ -1929,10 +1939,16 @@ function handleGroupContextMenuSelect(key: string) {
     projectModalGroupId.value = groupContextMenuGroupId.value;
     newCategoryName.value = "";
   }
+  if (key === "edit_color" && groupContextMenuGroupId.value) {
+    projectModalGroupId.value = groupContextMenuGroupId.value;
+    projectModalColor.value = groupStore.groupById(groupContextMenuGroupId.value)?.color ?? null;
+    showProjectEditModal.value = true;
+  }
 }
 
 const groupContextMenuOptions = computed(() => [
   { label: t('group.createCategory') || 'Create Category', key: "create_category" },
+  { label: t('group.editColor') || 'Edit Color', key: "edit_color" },
 ]);
 
 /** Tag management helpers */
@@ -2725,6 +2741,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 @drop.stop="onGroupDrop(grp.groupId)"
               >
                 <span class="project-group-arrow">{{ collapsedGroupIds.has(grp.groupId) ? '▸' : '▾' }}</span>
+                <span v-if="groupStore.groupById(grp.groupId)?.color" class="project-group-dot" :style="{ background: groupStore.groupById(grp.groupId)?.color ?? undefined }" />
                 <NText strong style="font-size: 12px; flex: 1">{{ grp.groupName }}</NText>
                 <NButton
                   size="tiny"
@@ -2783,6 +2800,21 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 autofocus
                 style="margin-top: 4px"
               />
+              <NSpace :size="4" align="center" style="margin-top: 4px">
+                <NText depth="3" style="font-size: 11px">{{ t('tag.color') || 'Color' }}:</NText>
+                <NSpace :size="3">
+                  <button
+                    v-for="color in PRESET_COLORS.slice(0, 8)"
+                    :key="color"
+                    type="button"
+                    class="color-swatch"
+                    :class="{ 'color-swatch--active': newProjectGroupColor === color }"
+                    :style="{ background: color }"
+                    style="width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; padding: 0"
+                    @click="newProjectGroupColor = (newProjectGroupColor === color ? null : color)"
+                  />
+                </NSpace>
+              </NSpace>
               <NSpace style="margin-top: 4px">
                 <NButton size="tiny" type="primary" @click="submitCreateProjectGroup" :disabled="!newProjectGroupName.trim()">{{ t('common.create') }}</NButton>
                 <NButton size="tiny" quaternary @click="isCreatingProjectGroup = false">{{ t('common.cancel') }}</NButton>
@@ -4246,6 +4278,20 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
         clearable
       />
     </NFormItem>
+    <NFormItem :label="t('tag.color')" label-placement="left" :show-feedback="false">
+      <NSpace :size="6">
+        <button
+          v-for="color in PRESET_COLORS.slice(0, 8)"
+          :key="color"
+          type="button"
+          class="color-swatch"
+          :class="{ 'color-swatch--active': projectModalColor === color }"
+          :style="{ background: color }"
+          style="width: 20px; height: 20px; border-radius: 50%; border: none; cursor: pointer; padding: 0"
+          @click="projectModalColor = (projectModalColor === color ? null : color)"
+        />
+      </NSpace>
+    </NFormItem>
     <NFormItem :label="t('project.status') || 'Status'" label-placement="left" :show-feedback="false">
       <NSpace vertical :size="4">
         <NSwitch v-model:value="projectModalArchived">
@@ -4988,6 +5034,12 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 .project-group-header--drag-over {
   background: var(--tt-accent-bg, rgba(24, 160, 255, 0.2));
   outline: 2px dashed var(--tt-hover-border, rgba(24, 160, 255, 0.6));
+}
+.project-group-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 .project-group-arrow {
   font-size: 10px;
