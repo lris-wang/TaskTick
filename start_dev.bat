@@ -15,7 +15,7 @@ start "TaskTick API" cmd /k "python -m uvicorn app.main:app --host 127.0.0.1 --p
 :: Wait for API to start
 timeout /t 3 /nobreak >nul
 
-:: Start frontend
+:: Start frontend11
 echo [2/2] Starting frontend...
 cd /d %~dp0apps\web
 start "TaskTick Frontend" cmd /k "pnpm run dev"

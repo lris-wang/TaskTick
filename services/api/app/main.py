@@ -48,7 +48,7 @@ async def _run_due_notification_scheduler() -> None:
     """
     from datetime import datetime, timedelta, timezone
     from sqlalchemy import select
-    from app.database import AsyncSessionLocal
+    from app.database import SessionLocal as AsyncSessionLocal
     from app.models import PushSubscription, Task, User
     from app.utils.email import send_task_reminder
     from app.utils.webpush import send_web_push

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
@@ -16,4 +16,9 @@ class VerificationCode(Base):
 
     @property
     def is_expired(self) -> bool:
-        return datetime.utcnow() > self.expires_at
+        if self.expires_at is None:
+            return True
+        # Compare as naive UTC datetimes
+        now_utc = datetime.utcnow()
+        exp_utc = self.expires_at.replace(tzinfo=None) if self.expires_at.tzinfo else self.expires_at
+        return now_utc > exp_utc
