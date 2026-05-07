@@ -126,8 +126,10 @@ async def send_verify_code(
     # Check if email already registered
     result = await session.execute(select(User).where(User.email == body.email))
     if result.scalar_one_or_none() is not None:
-        # Don't reveal whether email is taken
-        return {"message": "验证码已发送"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该邮箱已注册，请登录",
+        )
 
     code = generate_code(body.email)
     await store_code(body.email, code)
