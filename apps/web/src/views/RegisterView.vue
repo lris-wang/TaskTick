@@ -7,7 +7,7 @@ import { registerWithCode, sendVerifyCode, uploadAvatar } from "../api";
 
 const router = useRouter();
 
-/** 0 = enter email, 1 = enter code+password, 2 = success */
+/** 0 = enter email, 1 = code+password+confirm, 2 = success */
 const step = ref(0);
 
 const email = ref("");
@@ -88,9 +88,9 @@ async function onSendCode() {
 
   sendingCode.value = true;
   try {
-    const ok = await sendVerifyCode(e);
-    if (!ok) {
-      errorText.value = "发送失败，请稍后重试";
+    const result = await sendVerifyCode(e);
+    if (!result.ok) {
+      errorText.value = result.error || "发送失败，请稍后重试";
       return;
     }
     step.value = 1;
@@ -132,6 +132,7 @@ async function onSubmit() {
   const code = codeDigits.value.join("");
   if (code.length < 4) { errorText.value = "请输入完整的4位验证码"; return; }
   if (password.value.length < 4) { errorText.value = "密码至少4位"; return; }
+  if (password.value !== confirmPassword.value) { errorText.value = "两次输入的密码不一致"; return; }
 
   // Validate that email still matches (in case user changed it)
   const e = email.value.trim();
@@ -141,28 +142,14 @@ async function onSubmit() {
     return;
   }
 
-  // Store email in session for confirm step
-  step.value = 2;
-}
-
-async function onConfirmPassword() {
-  errorText.value = "";
-  if (password.value !== confirmPassword.value) {
-    errorText.value = "两次输入的密码不一致";
-    return;
-  }
-
   loading.value = true;
   try {
-    const e = email.value.trim();
-    const code = codeDigits.value.join("");
     const data = await registerWithCode(e, code, password.value, username.value.trim(), avatarUrl.value);
     if ("error" in data) {
       errorText.value = data.error;
-      step.value = 1;
       return;
     }
-    step.value = 3;
+    step.value = 2;
     setTimeout(() => router.push("/login"), 2000);
   } catch (err) {
     errorText.value = err instanceof Error ? err.message : "注册失败";
@@ -170,6 +157,7 @@ async function onConfirmPassword() {
     loading.value = false;
   }
 }
+
 </script>
 
 <template>
@@ -196,11 +184,6 @@ async function onConfirmPassword() {
         <div class="step-line" :class="{ active: step >= 2 }" />
         <div class="step-dot" :class="{ active: step >= 2, done: step > 2 }">
           <span v-if="step === 2">3</span>
-          <span v-else>✓</span>
-        </div>
-        <div class="step-line" :class="{ active: step >= 3 }" />
-        <div class="step-dot" :class="{ active: step >= 3, done: step > 3 }">
-          <span v-if="step === 3">4</span>
           <span v-else>✓</span>
         </div>
       </div>
@@ -249,7 +232,7 @@ async function onConfirmPassword() {
         </NButton>
       </NForm>
 
-      <!-- Step 1: Code + Password -->
+      <!-- Step 1: Code + Password + Confirm -->
       <NForm v-else-if="step === 1" @submit.prevent="onSubmit">
         <NText depth="3" style="display:block;margin-bottom:16px;font-size:13px">
           验证码已发送至 <strong>{{ email }}</strong>，请查收。
@@ -284,6 +267,17 @@ async function onConfirmPassword() {
             size="large"
           />
         </NFormItem>
+        <NFormItem label="确认密码">
+          <NInput
+            v-model:value="confirmPassword"
+            type="password"
+            show-password-on="click"
+            placeholder="再次输入密码"
+            autocomplete="new-password"
+            :disabled="loading"
+            size="large"
+          />
+        </NFormItem>
         <NFormItem label="用户名（可选）">
           <NInput
             v-model:value="username"
@@ -302,7 +296,7 @@ async function onConfirmPassword() {
           :loading="loading"
           attr-type="submit"
         >
-          下一步
+          完成注册
         </NButton>
 
         <div class="resend-row">
@@ -326,44 +320,8 @@ async function onConfirmPassword() {
         </div>
       </NForm>
 
-      <!-- Step 2: Confirm Password -->
-      <NForm v-else-if="step === 2" @submit.prevent="onConfirmPassword">
-        <NText depth="3" style="display:block;margin-bottom:16px;font-size:13px">
-          请再次输入密码以确认。
-        </NText>
-
-        <NFormItem label="确认密码">
-          <NInput
-            v-model:value="confirmPassword"
-            type="password"
-            show-password-on="click"
-            placeholder="再次输入密码"
-            autocomplete="new-password"
-            :disabled="loading"
-            size="large"
-          />
-        </NFormItem>
-
-        <NText v-if="errorText" type="error" class="register-error">{{ errorText }}</NText>
-        <NButton
-          type="primary"
-          block
-          size="large"
-          :loading="loading"
-          attr-type="submit"
-        >
-          完成注册
-        </NButton>
-
-        <div class="resend-row">
-          <NButton text style="color:var(--tt-accent,#18a0ff);font-size:12px" :disabled="loading" @click="step = 1">
-            ← 返回修改密码
-          </NButton>
-        </div>
-      </NForm>
-
-      <!-- Step 3: Success -->
-      <div v-else-if="step === 3" class="success-area">
+      <!-- Step 2: Success -->
+      <div v-else-if="step === 2" class="success-area">
         <div class="success-icon">✓</div>
         <NText strong style="font-size:16px;display:block;margin-bottom:8px">注册成功！</NText>
         <NText depth="3" style="font-size:13px">即将跳转到登录页面…</NText>

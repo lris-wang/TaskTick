@@ -211,16 +211,20 @@ export async function resetPassword(email: string, code: string, newPassword: st
   }
 }
 
-export async function sendVerifyCode(email: string): Promise<boolean> {
+export async function sendVerifyCode(email: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const res = await fetch(`${BASE}/api/v1/auth/send-verify-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    return res.ok;
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data.detail || "发送失败" };
+    }
+    return { ok: true };
   } catch {
-    return false;
+    return { ok: false, error: "网络错误" };
   }
 }
 
