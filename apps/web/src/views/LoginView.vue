@@ -122,7 +122,8 @@ async function onSubmit() {
       <template #footer>
         <NText depth="3" style="font-size: 12px; line-height: 1.5">
           还没有账号？
-          <router-link to="/register" style="color: var(--tt-accent, #18a0ff); text-decoration: none">立即注册</router-link>
+          <router-link v-if="loginMethod === 0" to="/register" style="color: var(--tt-accent, #18a0ff); text-decoration: none">立即注册</router-link>
+          <router-link v-else to="/phone-register" style="color: var(--tt-accent, #18a0ff); text-decoration: none">立即注册</router-link>
           &nbsp;·&nbsp;
           <router-link to="/reset-password" style="color: var(--tt-accent, #18a0ff); text-decoration: none">忘记密码</router-link>
         </NText>

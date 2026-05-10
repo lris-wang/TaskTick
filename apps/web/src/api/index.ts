@@ -264,6 +264,45 @@ export async function registerWithCode(
   }
 }
 
+export async function sendPhoneVerifyCode(phone: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${BASE}/api/v1/auth/send-phone-verify-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: (data as { detail?: string }).detail || "发送失败" };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "网络错误" };
+  }
+}
+
+export async function phoneRegister(
+  phone: string,
+  code: string,
+  password: string,
+  username?: string,
+): Promise<{ id: string; phone: string; username: string } | { error: string }> {
+  try {
+    const res = await fetch(`${BASE}/api/v1/auth/phone-register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, code, password, username }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { error: (data as { detail?: string }).detail ?? "注册失败" };
+    }
+    return await res.json();
+  } catch {
+    return { error: "网络错误" };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Tasks
 // ---------------------------------------------------------------------------
