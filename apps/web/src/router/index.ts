@@ -25,6 +25,18 @@ export const router = createRouter({
       meta: { guestOnly: true },
     },
     {
+      path: "/email-login",
+      name: "email-login",
+      component: () => import("../views/EmailLoginView.vue"),
+      meta: { guestOnly: true },
+    },
+    {
+      path: "/phone-login",
+      name: "phone-login",
+      component: () => import("../views/PhoneLoginView.vue"),
+      meta: { guestOnly: true },
+    },
+    {
       path: "/register",
       name: "register",
       component: () => import("../views/RegisterView.vue"),

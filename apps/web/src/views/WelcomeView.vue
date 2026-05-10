@@ -8,9 +8,9 @@ const showMethodModal = ref(false);
 
 function goLogin(method: number) {
   if (method === 0) {
-    router.push("/login");
+    router.push("/email-login");
   } else if (method === 1) {
-    router.push("/login");
+    router.push("/phone-login");
   } else {
     showMethodModal.value = true;
   }
