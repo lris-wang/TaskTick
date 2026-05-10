@@ -314,6 +314,7 @@ async def phone_register(
         )
 
     user = User(
+        email=f"phone_{body.phone}@localhost",
         phone=body.phone,
         username=body.username or "",
         password_hash=hash_password(body.password),
