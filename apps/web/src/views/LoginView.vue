@@ -52,9 +52,10 @@ async function onSubmit() {
         return;
       }
     } else if (loginMethod.value === 2) {
-      const res = await auth.loginWithCode(email.value, code.value);
+      // Email code login not yet implemented - use password login instead
+      const res = await auth.login(email.value, password.value);
       if (!res.ok) {
-        errorText.value = res.error || "登录失败";
+        errorText.value = res.message;
         return;
       }
     }
