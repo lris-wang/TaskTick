@@ -18,10 +18,13 @@ from app.schemas.auth import (
     ChangeAvatarRequest,
     ChangePasswordRequest,
     ChangeUsernameRequest,
+    PhoneLogin,
+    PhoneRegisterRequest,
     RegisterWithCodeRequest,
     ResetPasswordRequest,
     SendResetCodeRequest,
     SendVerifyCodeRequest,
+    SendPhoneVerifyCodeRequest,
     TokenResponse,
     UserLogin,
     UserRegister,
@@ -245,7 +248,27 @@ async def login(
     )
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/phone-login", response_model=TokenResponse)
+async def phone_login(
+    body: PhoneLogin,
+    session: AsyncSession = Depends(get_session),
+) -> TokenResponse:
+    result = await session.execute(select(User).where(User.phone == body.phone))
+    user = result.scalar_one_or_none()
+    if user is None or not verify_password(body.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="手机号或密码错误",
+        )
+    access_token = create_access_token(str(user.id))
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        id=str(user.id),
+        email=user.email,
+        username=user.username,
+        avatar_url=user.avatar_url,
+    )
 async def logout(
     creds: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer(auto_error=True))],
 ) -> None:

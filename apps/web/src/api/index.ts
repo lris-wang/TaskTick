@@ -164,6 +164,26 @@ export async function login(
   }
 }
 
+export async function phoneLogin(
+  phone: string,
+  password: string,
+): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string } | { error: string }> {
+  try {
+    const res = await fetch(`${BASE}/api/v1/auth/phone-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, password }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return { error: (body as { detail?: string }).detail ?? "手机号或密码错误" };
+    }
+    return await res.json();
+  } catch {
+    return { error: "网络错误，请检查网络连接" };
+  }
+}
+
 export async function register(
   email: string,
   username: string,

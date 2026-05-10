@@ -65,3 +65,19 @@ class ResetPasswordRequest(BaseModel):
     email: EmailStr
     code: str
     new_password: str
+
+
+class PhoneLogin(BaseModel):
+    phone: str
+    password: str
+
+
+class PhoneRegisterRequest(BaseModel):
+    phone: str
+    code: str
+    password: str
+    username: str = ""
+
+
+class SendPhoneVerifyCodeRequest(BaseModel):
+    phone: str

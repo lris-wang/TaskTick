@@ -52,9 +52,12 @@ async function onSubmit() {
         return;
       }
     } else if (loginMethod.value === 1) {
-      errorText.value = "手机登录即将上线";
-      loading.value = false;
-      return;
+      const res = await auth.phoneLogin(phone.value, password.value);
+      if (!res.ok) {
+        errorText.value = res.message;
+        loading.value = false;
+        return;
+      }
     }
     await Promise.all([
       taskStore.hydrate(),

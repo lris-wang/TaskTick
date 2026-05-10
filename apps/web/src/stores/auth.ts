@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { login as apiLogin } from "../api";
+import { login as apiLogin, phoneLogin as apiPhoneLogin } from "../api";
 import { newId } from "../utils/id";
 
 const STORAGE_KEY = "tasktick.auth.v1";
@@ -163,6 +163,43 @@ export const useAuthStore = defineStore("auth", {
       console.log("[auth] login writing to localStorage:", json.slice(0, 80));
       localStorage.setItem(STORAGE_KEY, json);
       console.log("[auth] login localStorage set, reading back:", localStorage.getItem(STORAGE_KEY)?.slice(0, 80));
+      this.persist();
+      this.hydrated = true;
+
+      try {
+        sessionStorage.removeItem(REMINDER_DISMISS_SESSION_KEY);
+      } catch {
+        /* ignore */
+      }
+      return { ok: true };
+    },
+    async phoneLogin(phone: string, password: string): Promise<{ ok: true } | { ok: false; message: string }> {
+      const p = phone.trim();
+      if (!p) return { ok: false, message: "请输入手机号" };
+      if (password.length < 4) return { ok: false, message: "密码至少 4 位" };
+      const data = await apiPhoneLogin(p, password);
+      if ("error" in data) return { ok: false, message: data.error };
+
+      const token = data.access_token;
+      const username = data.username || data.email?.split("@")[0] || "user";
+      const email_ = data.email;
+
+      this.token = token;
+      this.username = username;
+      this.email = email_;
+      this.avatarUrl = data.avatar_url || null;
+
+      const json = JSON.stringify({
+        token: this.token,
+        username: this.username,
+        email: this.email,
+        avatarUrl: this.avatarUrl,
+        desktopNotifyEnabled: this.desktopNotifyEnabled,
+        themeAccentColor: this.themeAccentColor,
+        themeMode: this.themeMode,
+        sidebarModuleOrder: this.sidebarModuleOrder,
+      });
+      localStorage.setItem(STORAGE_KEY, json);
       this.persist();
       this.hydrated = true;
 
