@@ -15,14 +15,13 @@ const taskStore = useTaskStore();
 const tagStore = useTagStore();
 const teamStore = useTeamStore();
 
-/** 0 = email+password, 1 = phone, 2 = email+code */
+/** 0 = email+password, 1 = phone */
 const loginMethod = ref(0);
 const showMethodModal = ref(false);
 
 const email = ref("");
 const password = ref("");
 const phone = ref("");
-const code = ref("");
 const loading = ref(false);
 const errorText = ref("");
 
@@ -49,15 +48,13 @@ async function onSubmit() {
       const res = await auth.login(email.value, password.value);
       if (!res.ok) {
         errorText.value = res.message;
+        loading.value = false;
         return;
       }
-    } else if (loginMethod.value === 2) {
-      // Email code login not yet implemented - use password login instead
-      const res = await auth.login(email.value, password.value);
-      if (!res.ok) {
-        errorText.value = res.message;
-        return;
-      }
+    } else if (loginMethod.value === 1) {
+      errorText.value = "手机登录即将上线";
+      loading.value = false;
+      return;
     }
     await Promise.all([
       taskStore.hydrate(),
@@ -83,13 +80,11 @@ async function onSubmit() {
       <div class="method-selector" @click="showMethodModal = true">
         <span class="method-icon">
           <template v-if="loginMethod === 0">📧</template>
-          <template v-else-if="loginMethod === 1">📱</template>
-          <template v-else>✉️</template>
+          <template v-else>📱</template>
         </span>
         <span class="method-name">
           <template v-if="loginMethod === 0">邮箱密码登录</template>
-          <template v-else-if="loginMethod === 1">手机登录</template>
-          <template v-else>邮箱验证码登录</template>
+          <template v-else>手机登录</template>
         </span>
         <span class="method-arrow">▼</span>
       </div>
@@ -120,13 +115,6 @@ async function onSubmit() {
             :disabled="loading"
           />
         </NFormItem>
-        <NFormItem v-if="loginMethod === 2" label="验证码">
-          <NInput
-            v-model:value="code"
-            placeholder="请输入验证码"
-            :disabled="loading"
-          />
-        </NFormItem>
 
         <NText v-if="errorText" type="error" class="login-error">{{ errorText }}</NText>
         <NButton type="primary" block size="large" :loading="loading" attr-type="submit">登录</NButton>
@@ -148,21 +136,20 @@ async function onSubmit() {
           <span class="method-icon-lg">📧</span>
           <span class="method-label">邮箱密码登录</span>
         </div>
-        <div class="method-item" @click="selectMethod(2)">
-          <span class="method-icon-lg">✉️</span>
-          <span class="method-label">邮箱验证码登录</span>
-        </div>
         <div class="method-item" @click="selectMethod(1)">
           <span class="method-icon-lg">📱</span>
           <span class="method-label">手机登录</span>
         </div>
-        <div class="method-item" @click="selectMethod(3)">
+        <div class="method-item method-item--disabled" @click="showMethodModal = false">
           <span class="method-icon-lg">💬</span>
-          <span class="method-label">QQ登录</span>
+          <span class="method-label">微信登录</span>
+          <span class="method-soon">即将上线</span>
         </div>
-      </div>
-      <div style="text-align:center;margin-top:16px;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.3);">更多登录方式 即将上线</span>
+        <div class="method-item method-item--disabled" @click="showMethodModal = false">
+          <span class="method-icon-lg">🐧</span>
+          <span class="method-label">QQ登录</span>
+          <span class="method-soon">即将上线</span>
+        </div>
       </div>
     </NModal>
   </div>
@@ -239,5 +226,17 @@ async function onSubmit() {
 .method-label {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
+}
+.method-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.method-item--disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.method-soon {
+  font-size: 10px;
+  color: var(--tt-accent, #18a0ff);
+  margin-top: 4px;
 }
 </style>
