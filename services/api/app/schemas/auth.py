@@ -37,7 +37,7 @@ class TokenResponse(BaseModel):
 
 class UserResponse(BaseModel):
     id: UUID
-    email: str
+    email: str | None
     username: str
     avatar_url: str = ""
 
