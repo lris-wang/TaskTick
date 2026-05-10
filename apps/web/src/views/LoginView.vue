@@ -16,7 +16,7 @@ const tagStore = useTagStore();
 const teamStore = useTeamStore();
 
 /** 0 = email+password, 1 = phone */
-const loginMethod = ref(0);
+const loginMethod = ref(Number(route.query.method ?? 0));
 const showMethodModal = ref(false);
 
 const email = ref("");
@@ -134,6 +134,10 @@ async function onSubmit() {
       </NForm>
       <template #footer>
         <NText depth="3" style="font-size: 12px; line-height: 1.5">
+          <NButton v-if="loginMethod === 1" text style="color: var(--tt-accent, #18a0ff); font-size: 12px" @click="router.push('/welcome')">
+            ← 返回
+          </NButton>
+          <span v-if="loginMethod === 1"> · </span>
           还没有账号？
           <router-link v-if="loginMethod === 0" to="/register" style="color: var(--tt-accent, #18a0ff); text-decoration: none">立即注册</router-link>
           <router-link v-else to="/phone-register" style="color: var(--tt-accent, #18a0ff); text-decoration: none">立即注册</router-link>

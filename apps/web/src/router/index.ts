@@ -7,6 +7,18 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
+      path: "/",
+      name: "home",
+      component: HomeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/welcome",
+      name: "welcome",
+      component: () => import("../views/WelcomeView.vue"),
+      meta: { guestOnly: true },
+    },
+    {
       path: "/login",
       name: "login",
       component: () => import("../views/LoginView.vue"),
@@ -49,7 +61,7 @@ router.beforeEach((to) => {
   const auth = useAuthStore();
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return {
-      name: "login",
+      name: "welcome",
       ...(to.fullPath !== "/" ? { query: { redirect: to.fullPath } } : {}),
     };
   }
