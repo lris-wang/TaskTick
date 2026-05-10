@@ -269,6 +269,64 @@ async def phone_login(
         username=user.username,
         avatar_url=user.avatar_url,
     )
+
+
+@router.post("/send-phone-verify-code")
+async def send_phone_verify_code(
+    body: SendPhoneVerifyCodeRequest,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """
+    发送手机验证码（用于手机号注册）。
+    """
+    result = await session.execute(select(User).where(User.phone == body.phone))
+    if result.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该手机号已注册，请登录",
+        )
+
+    code = generate_code(body.phone)
+    await store_code(body.phone, code)
+    logger.info("[phone_verify_code] phone=%s code=%s", body.phone, code)
+    return {"message": "验证码已发送"}
+
+
+@router.post("/phone-register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def phone_register(
+    body: PhoneRegisterRequest,
+    session: AsyncSession = Depends(get_session),
+) -> User:
+    """
+    手机号注册：验证验证码并创建用户。
+    """
+    if not await verify_code(body.phone, body.code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="验证码错误或已过期",
+        )
+
+    result = await session.execute(select(User).where(User.phone == body.phone))
+    if result.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该手机号已被注册",
+        )
+
+    user = User(
+        phone=body.phone,
+        username=body.username or "",
+        password_hash=hash_password(body.password),
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    await delete_code(body.phone)
+    return user
+
+
+@router.post("/logout")
 async def logout(
     creds: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer(auto_error=True))],
 ) -> None:

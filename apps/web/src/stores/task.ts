@@ -150,7 +150,10 @@ export const useTaskStore = defineStore("task", {
           case "today": {
             if (t.completed) return false;
             const dk = dueCalendarKey(t.dueAt);
-            return dk !== null && dk <= today;
+            const sk = dueCalendarKey(t.startAt);
+            const ck = dueCalendarKey(t.createdAt);
+            // Show if due today OR scheduled to start today OR created today
+            return (dk !== null && dk <= today) || (sk !== null && sk <= today) || (ck !== null && ck === today);
           }
           case "planned": {
             if (t.completed) return false;

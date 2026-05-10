@@ -2058,7 +2058,7 @@ async function quickAddTask() {
     priority: draft.priority,
     isImportant: draft.isImportant,
     repeatRule: draft.repeatRule,
-    projectIds: [],
+    projectIds: selectedProjectId.value ? [selectedProjectId.value] : [],
     tagIds: [],
   });
   if (task) {
