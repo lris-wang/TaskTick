@@ -118,6 +118,16 @@ async function onSubmit() {
             :disabled="loading"
           />
         </NFormItem>
+        <NFormItem v-if="loginMethod === 1" label="密码">
+          <NInput
+            v-model:value="password"
+            type="password"
+            show-password-on="click"
+            placeholder="至少 4 位"
+            autocomplete="current-password"
+            :disabled="loading"
+          />
+        </NFormItem>
 
         <NText v-if="errorText" type="error" class="login-error">{{ errorText }}</NText>
         <NButton type="primary" block size="large" :loading="loading" attr-type="submit">登录</NButton>
