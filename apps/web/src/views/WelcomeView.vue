@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NCard, NText, NButton, NModal } from "naive-ui";
+import { NButton, NModal } from "naive-ui";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -14,11 +14,6 @@ function goLogin(method: number) {
   } else {
     showMethodModal.value = true;
   }
-}
-
-function selectMethod(method: number) {
-  showMethodModal.value = false;
-  router.push({ path: "/login", query: { method: String(method) } });
 }
 </script>
 
