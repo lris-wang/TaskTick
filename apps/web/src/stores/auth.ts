@@ -75,7 +75,7 @@ export const useAuthStore = defineStore("auth", {
     /** 当前主题色系 ID，默认 "blue" */
     themeAccentColor: "blue",
     /** 主题模式，默认 "dark" */
-    themeMode: "dark" as "dark" | "light",
+    themeMode: "light" as "dark" | "light",
     /** 侧边栏模块顺序，默认 [list, pomodoro, stats, search, habits, notes] */
     sidebarModuleOrder: ["list", "pomodoro", "stats", "search", "habits", "notes"],
     /** 是否已完成 hydrate（防止 beforeEach 在 hydrate 前执行） */
@@ -103,7 +103,7 @@ export const useAuthStore = defineStore("auth", {
       this.avatarUrl = p.avatarUrl ?? null;
       this.desktopNotifyEnabled = p.desktopNotifyEnabled ?? true;
       this.themeAccentColor = p.themeAccentColor ?? "blue";
-      this.themeMode = p.themeMode ?? "dark";
+      this.themeMode = p.themeMode ?? "light";
       this.sidebarModuleOrder = p.sidebarModuleOrder ?? ["list", "pomodoro", "stats", "search", "habits", "notes"];
       this.hydrated = true;
       console.log("[auth] hydrate done, isLoggedIn=", this.isLoggedIn);
