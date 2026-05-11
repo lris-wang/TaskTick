@@ -19,10 +19,43 @@ function goLogin(method: number) {
 
 <template>
   <div class="welcome-page">
-    <!-- 花体 welcome -->
-    <div class="welcome-title">
-      <span class="welcome-text">Welcome</span>
-      <span class="app-name">TaskTick</span>
+    <!-- 整体入场动画容器 -->
+    <div class="welcome-container">
+      <!-- 笑脸 SVG -->
+      <div class="face-container">
+        <svg class="kawaii-face" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 左眼 - 睁着 -->
+          <g class="eye-left">
+            <ellipse cx="42" cy="38" rx="7" ry="8" stroke="currentColor" stroke-width="2.5" fill="none"/>
+            <circle cx="42" cy="38" r="3" fill="currentColor" class="pupil"/>
+          </g>
+
+          <!-- 右眼 - 眨眼动画 -->
+          <g class="eye-right">
+            <ellipse cx="98" cy="38" rx="7" ry="8" stroke="currentColor" stroke-width="2.5" fill="none" class="eye-open"/>
+            <path d="M91 38 Q98 33 105 38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" class="eye-wink"/>
+          </g>
+
+          <!-- 嘴巴 - 微笑 -->
+          <path class="mouth" d="M52 58 Q70 72 88 58" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+          <!-- 腮红左 -->
+          <ellipse cx="22" cy="52" rx="8" ry="5" fill="rgba(255,130,150,0.35)"/>
+          <!-- 腮红右 -->
+          <ellipse cx="118" cy="52" rx="8" ry="5" fill="rgba(255,130,150,0.35)"/>
+
+          <!-- 小星星装饰 -->
+          <text x="8" y="20" font-size="10" fill="currentColor" opacity="0.4">✦</text>
+          <text x="120" y="22" font-size="8" fill="currentColor" opacity="0.3">✦</text>
+          <text x="65" y="10" font-size="7" fill="currentColor" opacity="0.3">✧</text>
+        </svg>
+      </div>
+
+      <!-- Welcome TaskTick 文字卡片 -->
+      <div class="title-card">
+        <span class="welcome-text">Welcome</span>
+        <span class="app-name">TaskTick</span>
+      </div>
     </div>
 
     <!-- 长条登录选择区域 -->
@@ -61,28 +94,22 @@ function goLogin(method: number) {
 
     <!-- 其他选项 -->
     <div class="other-links">
-      <NButton text class="link-btn" @click="router.push('/register')">
-        邮箱注册
-      </NButton>
+      <NButton text class="link-btn" @click="router.push('/register')">邮箱注册</NButton>
       <span class="link-sep">·</span>
-      <NButton text class="link-btn" @click="router.push('/phone-register')">
-        手机注册
-      </NButton>
+      <NButton text class="link-btn" @click="router.push('/phone-register')">手机注册</NButton>
       <span class="link-sep">·</span>
-      <NButton text class="link-btn" @click="router.push('/reset-password')">
-        忘记密码
-      </NButton>
+      <NButton text class="link-btn" @click="router.push('/reset-password')">忘记密码</NButton>
     </div>
 
     <!-- Method selection modal -->
     <NModal v-model:show="showMethodModal" preset="card" title="更多登录方式" style="width: 320px;" :bordered="false">
       <div class="method-grid">
-        <div class="method-item method-item--disabled" @click="showMethodModal = false">
+        <div class="method-item method-item--disabled">
           <span class="method-icon-lg">💬</span>
           <span class="method-label">微信登录</span>
           <span class="method-soon">即将上线</span>
         </div>
-        <div class="method-item method-item--disabled" @click="showMethodModal = false">
+        <div class="method-item method-item--disabled">
           <span class="method-icon-lg">🐧</span>
           <span class="method-label">QQ登录</span>
           <span class="method-soon">即将上线</span>
@@ -100,32 +127,131 @@ function goLogin(method: number) {
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  background: var(--tt-guest-bg, #0a0a0f);
+  background: var(--tt-guest-bg, #f0f2f5);
   gap: 40px;
 }
 
-/* 花体 welcome */
-.welcome-title {
+/* 整体入场容器 */
+.welcome-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 0;
+  animation: emergeFromBehind 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+@keyframes emergeFromBehind {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.85);
+    filter: blur(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 笑脸容器 */
+.face-container {
+  margin-bottom: -20px;
+  z-index: 2;
+}
+
+.kawaii-face {
+  width: 140px;
+  height: 100px;
+  color: var(--tt-guest-text, #374151);
+  overflow: visible;
+}
+
+/* 左眼 */
+.eye-left {
+  animation: floatLeft 3s ease-in-out infinite;
+}
+
+/* 右眼眨眼 */
+.eye-right .eye-open {
+  animation: wink 2.5s ease-in-out infinite;
+}
+.eye-right .eye-wink {
+  animation: wink 2.5s ease-in-out infinite;
+}
+
+/* 瞳孔闪烁 */
+.pupil {
+  animation: blinkPupil 2.5s ease-in-out infinite;
+}
+
+@keyframes blinkPupil {
+  0%, 45%, 55%, 100% { transform: scale(1); }
+  50% { transform: scale(0.6); }
+}
+
+/* 眨眼关键帧 */
+@keyframes wink {
+  0%, 40% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  45%, 55% {
+    opacity: 0;
+    transform: scaleY(0.1);
+  }
+  60% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* 左眼浮动 */
+@keyframes floatLeft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* 嘴巴微动 */
+.mouth {
+  animation: smilePulse 3s ease-in-out infinite;
+}
+
+@keyframes smilePulse {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.05); }
+}
+
+/* 文字卡片 */
+.title-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+  margin-top: -10px;
 }
 
 .welcome-text {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 300;
   font-style: italic;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.85));
-  letter-spacing: 8px;
+  color: var(--tt-guest-text, #374151);
+  letter-spacing: 6px;
   text-transform: uppercase;
+  line-height: 1;
 }
 
 .app-name {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--tt-accent, #18a0ff);
-  letter-spacing: 12px;
+  letter-spacing: 10px;
+  text-transform: uppercase;
 }
 
 /* 长条登录卡片 */
@@ -134,6 +260,18 @@ function goLogin(method: number) {
   gap: 16px;
   width: 100%;
   max-width: 640px;
+  animation: fadeSlideUp 0.8s ease-out 0.7s both;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-card {
@@ -141,19 +279,21 @@ function goLogin(method: number) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 28px 16px;
-  background: var(--tt-card-bg, rgba(255, 255, 255, 0.06));
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 12px;
+  background: var(--tt-card-bg, #ffffff);
+  border: 1.5px solid var(--tt-input-border, rgba(0,0,0,0.1));
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 120px;
+  min-height: 110px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
 .login-card:hover:not(.login-card--disabled) {
-  background: var(--tt-card-bg, rgba(255, 255, 255, 0.1));
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  background: var(--tt-card-bg, #ffffff);
+  border-color: var(--tt-accent, #18a0ff);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 .login-card--disabled {
@@ -162,13 +302,13 @@ function goLogin(method: number) {
 }
 
 .card-icon {
-  font-size: 36px;
-  margin-bottom: 10px;
+  font-size: 32px;
+  margin-bottom: 8px;
 }
 
 .card-label {
-  font-size: 14px;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.8));
+  font-size: 13px;
+  color: var(--tt-guest-text, #374151);
   font-weight: 500;
 }
 
@@ -185,8 +325,9 @@ function goLogin(method: number) {
   gap: 16px;
   width: 100%;
   max-width: 640px;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.25));
+  color: var(--tt-guest-text, #374151);
   font-size: 12px;
+  animation: fadeSlideUp 0.8s ease-out 0.85s both;
 }
 
 .divider::before,
@@ -194,7 +335,7 @@ function goLogin(method: number) {
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--tt-input-border, rgba(0,0,0,0.1));
 }
 
 /* 其他链接 */
@@ -203,10 +344,11 @@ function goLogin(method: number) {
   align-items: center;
   gap: 12px;
   font-size: 13px;
+  animation: fadeSlideUp 0.8s ease-out 1s both;
 }
 
 .link-btn {
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.5)) !important;
+  color: var(--tt-guest-text, rgba(55,65,81,0.6)) !important;
   font-size: 13px;
 }
 
@@ -215,7 +357,7 @@ function goLogin(method: number) {
 }
 
 .link-sep {
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.2));
+  color: var(--tt-input-border, rgba(0,0,0,0.2));
 }
 
 /* Method modal */
@@ -230,14 +372,14 @@ function goLogin(method: number) {
   flex-direction: column;
   align-items: center;
   padding: 20px 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--tt-card-bg, #ffffff);
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .method-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0,0,0,0.04);
 }
 
 .method-icon-lg {
@@ -247,16 +389,12 @@ function goLogin(method: number) {
 
 .method-label {
   font-size: 13px;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.7));
+  color: var(--tt-guest-text, #374151);
 }
 
 .method-item--disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.method-item--disabled:hover {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .method-soon {
