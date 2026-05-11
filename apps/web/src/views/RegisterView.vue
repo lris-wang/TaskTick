@@ -460,7 +460,7 @@ async function onSubmit() {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border: 2px dashed var(--tt-input-border, rgba(0, 0, 0, 0.2));
   background: var(--tt-card-bg, #ffffff);
   display: flex;
   align-items: center;
@@ -483,7 +483,7 @@ async function onSubmit() {
 }
 .avatar-placeholder {
   font-size: 28px;
-  color: var(--tt-guest-text, rgba(0, 0, 0, 0.3));
+  color: var(--tt-guest-text, #374151);
   line-height: 1;
 }
 </style>
