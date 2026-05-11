@@ -262,8 +262,8 @@ async function onSubmit() {
   width: 52px;
   height: 56px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--tt-input-border, rgba(0,0,0,0.15));
+  background: var(--tt-card-bg, #ffffff);
   color: var(--tt-guest-text, #fff);
   font-size: 24px;
   font-weight: 700;

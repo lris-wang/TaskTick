@@ -363,13 +363,13 @@ async function onSubmit() {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--tt-input-border, rgba(0,0,0,0.15));
+  background: var(--tt-card-bg, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.35));
+  color: var(--tt-guest-text, rgba(0, 0, 0, 0.35));
   flex-shrink: 0;
   transition: all 0.2s;
 }
@@ -386,7 +386,7 @@ async function onSubmit() {
 .step-line {
   flex: 1;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--tt-input-border, rgba(0, 0, 0, 0.1));
   max-width: 60px;
   transition: background 0.2s;
 }
@@ -405,9 +405,9 @@ async function onSubmit() {
   width: 52px;
   height: 56px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--tt-guest-text, #fff);
+  border: 1.5px solid var(--tt-input-border, rgba(0, 0, 0, 0.15));
+  background: var(--tt-input-bg, rgba(0, 0, 0, 0.03));
+  color: var(--tt-guest-text, #374151);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -461,7 +461,7 @@ async function onSubmit() {
   height: 72px;
   border-radius: 50%;
   border: 2px dashed rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--tt-card-bg, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -483,7 +483,7 @@ async function onSubmit() {
 }
 .avatar-placeholder {
   font-size: 28px;
-  color: var(--tt-guest-text, rgba(255, 255, 255, 0.3));
+  color: var(--tt-guest-text, rgba(0, 0, 0, 0.3));
   line-height: 1;
 }
 </style>
