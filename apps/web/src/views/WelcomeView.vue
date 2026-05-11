@@ -19,21 +19,10 @@ function goLogin(method: number) {
 
 <template>
   <div class="welcome-page">
-    <!-- 标题卡片：笑脸 + 文字 融为一体 -->
+    <!-- 标题卡片 -->
     <div class="title-card">
-      <!-- 笑脸 SVG，融入文字中 -->
-      <div class="face-row">
-        <!-- 左眼 -->
-        <div class="eye-static left-eye">●</div>
-        <!-- 右眼（眨眼动画，2s后停止） -->
-        <div class="eye-blink right-eye">●</div>
-        <!-- 笑嘴，2s后淡入并保持 -->
-        <div class="mouth-animate">ᴗ</div>
-      </div>
-      <div class="text-row">
-        <span class="welcome-text">Welcome</span>
-        <span class="app-name">TaskTick</span>
-      </div>
+      <span class="welcome-text">Welcome</span>
+      <span class="app-name">TaskTick</span>
     </div>
 
     <!-- 长条登录选择区域 -->
@@ -108,89 +97,31 @@ function goLogin(method: number) {
   gap: 36px;
 }
 
-/* 标题卡片：笑脸 + 文字 一体 */
+/* 标题卡片：干净文字 */
 .title-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
   background: var(--tt-card-bg, #ffffff);
   border-radius: 20px;
   padding: 24px 48px 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
   border: 1.5px solid var(--tt-input-border, rgba(0,0,0,0.08));
-  animation: emergeIn 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
-  position: relative;
+  animation: emergeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
 @keyframes emergeIn {
   0% {
     opacity: 0;
-    transform: translateY(50px) scale(0.88);
-    filter: blur(10px);
+    transform: translateY(40px) scale(0.92);
+    filter: blur(8px);
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0);
   }
-}
-
-/* 笑脸区域：眼睛和嘴巴与文字并排 */
-.face-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 6px;
-  position: relative;
-}
-
-/* 眼睛 ● */
-.eye-static {
-  font-size: 26px;
-  color: var(--tt-guest-text, #374151);
-  line-height: 1;
-  user-select: none;
-}
-
-/* 右眼：2s时眨一下，之后停止 */
-.eye-blink {
-  font-size: 26px;
-  color: var(--tt-guest-text, #374151);
-  line-height: 1;
-  user-select: none;
-  animation: oneWink 2s ease-in-out forwards;
-}
-
-@keyframes oneWink {
-  0%, 44% { opacity: 1; transform: scaleY(1); }
-  47% { opacity: 0; transform: scaleY(0.1); }
-  50% { opacity: 1; transform: scaleY(1); }
-  100% { opacity: 1; transform: scaleY(1); }
-}
-
-/* 嘴巴：2s后淡入，保持显示 */
-.mouth-animate {
-  font-size: 22px;
-  color: var(--tt-guest-text, #374151);
-  line-height: 1;
-  user-select: none;
-  opacity: 0;
-  transform: scale(0.5);
-  animation: mouthAppear 1s ease-out 2s forwards;
-  margin-top: -2px;
-}
-
-@keyframes mouthAppear {
-  0% { opacity: 0; transform: scale(0.5); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* 文字行 */
-.text-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
 }
 
 .welcome-text {
@@ -217,7 +148,7 @@ function goLogin(method: number) {
   gap: 14px;
   width: 100%;
   max-width: 620px;
-  animation: fadeUp 0.7s ease-out 0.6s both;
+  animation: fadeUp 0.7s ease-out 0.5s both;
 }
 
 @keyframes fadeUp {
@@ -278,7 +209,7 @@ function goLogin(method: number) {
   font-size: 12px;
   color: var(--tt-guest-text, #374151);
   opacity: 0.5;
-  animation: fadeUp 0.7s ease-out 0.8s both;
+  animation: fadeUp 0.7s ease-out 0.7s both;
 }
 
 .divider::before,
@@ -295,7 +226,7 @@ function goLogin(method: number) {
   align-items: center;
   gap: 12px;
   font-size: 13px;
-  animation: fadeUp 0.7s ease-out 1s both;
+  animation: fadeUp 0.7s ease-out 0.9s both;
 }
 
 .link-btn {
