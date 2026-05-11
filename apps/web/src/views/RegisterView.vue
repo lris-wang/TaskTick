@@ -483,7 +483,7 @@ async function onSubmit() {
 }
 .avatar-placeholder {
   font-size: 28px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.3));
   line-height: 1;
 }
 </style>

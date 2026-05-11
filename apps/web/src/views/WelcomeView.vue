@@ -116,7 +116,7 @@ function goLogin(method: number) {
   font-size: 56px;
   font-weight: 300;
   font-style: italic;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.85));
   letter-spacing: 8px;
   text-transform: uppercase;
 }
@@ -142,7 +142,7 @@ function goLogin(method: number) {
   flex-direction: column;
   align-items: center;
   padding: 28px 16px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--tt-card-bg, rgba(255, 255, 255, 0.06));
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   cursor: pointer;
@@ -151,7 +151,7 @@ function goLogin(method: number) {
 }
 
 .login-card:hover:not(.login-card--disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--tt-card-bg, rgba(255, 255, 255, 0.1));
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
@@ -168,7 +168,7 @@ function goLogin(method: number) {
 
 .card-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.8));
   font-weight: 500;
 }
 
@@ -185,7 +185,7 @@ function goLogin(method: number) {
   gap: 16px;
   width: 100%;
   max-width: 640px;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.25));
   font-size: 12px;
 }
 
@@ -206,7 +206,7 @@ function goLogin(method: number) {
 }
 
 .link-btn {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.5)) !important;
   font-size: 13px;
 }
 
@@ -215,7 +215,7 @@ function goLogin(method: number) {
 }
 
 .link-sep {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.2));
 }
 
 /* Method modal */
@@ -247,7 +247,7 @@ function goLogin(method: number) {
 
 .method-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.7));
 }
 
 .method-item--disabled {

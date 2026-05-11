@@ -213,11 +213,11 @@ async function onSubmit() {
 .method-name {
   flex: 1;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.8));
 }
 .method-arrow {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.4));
 }
 .method-grid {
   display: grid;
@@ -243,7 +243,7 @@ async function onSubmit() {
 }
 .method-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--tt-guest-text, rgba(255, 255, 255, 0.7));
 }
 .method-item--disabled {
   opacity: 0.5;
