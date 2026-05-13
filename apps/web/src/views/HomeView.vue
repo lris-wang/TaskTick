@@ -261,7 +261,7 @@ function confirmCustomDuration() {
 
 /** Outer nav: which panel is active */
 const NAV_STORAGE_KEY = "tasktick.activeNav";
-type NavValue = "list" | "search" | "habits" | "pomodoro" | "stats" | "notes" | "settings" | "trash";
+type NavValue = "list" | "search" | "habits" | "pomodoro" | "stats" | "notes" | "settings" | "trash" | "calendar";
 const savedNav = localStorage.getItem(NAV_STORAGE_KEY) as NavValue | null;
 const activeNav = ref<NavValue>(savedNav ?? "list");
 watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
@@ -271,6 +271,7 @@ watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
 const NAV_MODULE_DEFS = [
   { key: "pomodoro" as const, label: t('pomodoro.title'), icon: "🍅" },
   { key: "stats" as const, label: t('stats.title'), icon: "📊" },
+  { key: "calendar" as const, label: t('calendar.title'), icon: "📅" },
   { key: "list" as const, label: t('nav.all'), icon: "📋" },
   { key: "search" as const, label: t('common.search'), icon: "🔍" },
   { key: "habits" as const, label: t('habit.title'), icon: "🎯" },
@@ -280,10 +281,19 @@ const NAV_MODULE_DEFS = [
 
 /** Navigation modules in persistence order */
 const orderedNavItems = computed(() => {
-  const order = auth.sidebarModuleOrder ?? ["list", "pomodoro", "stats", "search", "habits", "notes"];
-  return [...NAV_MODULE_DEFS].sort(
-    (a, b) => order.indexOf(a.key) - order.indexOf(b.key),
-  );
+  const order = auth.sidebarModuleOrder ?? ["calendar", "list", "pomodoro", "stats", "search", "habits", "notes"];
+  return [...NAV_MODULE_DEFS]
+    .filter(item => {
+      if (item.key === "pomodoro") return auth.pomodoroEnabled;
+      if (item.key === "habits") return auth.habitsEnabled;
+      if (item.key === "notes") return auth.notesEnabled;
+      if (item.key === "stats") return auth.statsEnabled;
+      if (item.key === "calendar") return true;
+      return true;
+    })
+    .sort(
+      (a, b) => order.indexOf(a.key) - order.indexOf(b.key),
+    );
 });
 
 /** Sidebar module drag state */
@@ -319,7 +329,8 @@ function onSidebarModuleDragEnd() {
 }
 
 /** Task sort mode - must be declared before filteredTasks/flatTaskItems (TDZ avoidance) */
-const taskSortMode = ref<"manual" | "priority" | "createdAt" | "dueAt" | "title">("manual");
+const taskSortMode = ref<"manual" | "priority" | "createdAt" | "dueAt" | "title">(auth.listSortMode);
+watch(taskSortMode, (v) => auth.setListSortMode(v));
 
 /** Subtask expansion state - must be declared before flatTaskItems (TDZ avoidance) */
 const expandedTaskIds = ref<Set<string>>(new Set());
@@ -596,14 +607,6 @@ function dismissReminder() {
   showReminderModal.value = false;
 }
 
-function openReminderModal() {
-  if (reminderEntries.value.length === 0) {
-    message.info(t('common.noData') || 'No data');
-    return;
-  }
-  showReminderModal.value = true;
-}
-
 /** Handle create dropdown selection */
 function handleCreateDropdown(key: string) {
   if (key === "form") {
@@ -719,6 +722,17 @@ watch(
 onMounted(() => {
   reminderInitDone = true;
   rescheduleAllReminders();
+
+  // Check if we should open blank form from calendar/timeline skip
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("blankForm") === "1") {
+    // Remove param from URL without reload
+    params.delete("blankForm");
+    const newUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+    window.history.replaceState({}, "", newUrl);
+    openCreate();
+  }
+
   let dismissed = false;
   try {
     dismissed = sessionStorage.getItem(REMINDER_DISMISS_SESSION_KEY) === "1";
@@ -1408,7 +1422,6 @@ const dependTaskOptions = computed(() =>
 
 const showNlModal = ref(false);
 const nlRaw = ref("");
-const quickAddRaw = ref("");
 
 const listEmpty = computed(
   () => !searchText.value.trim() && filteredTasks.value.length === 0,
@@ -1490,9 +1503,6 @@ const editingTag = ref<Tag | null>(null);
 const editingTagName = ref("");
 const editingTagColor = ref<string | null>(null);
 const showEditTagModal = ref(false);
-
-/** Calendar view switch */
-const viewMode = ref<"list" | "calendar" | "kanban">("list");
 
 function isCustomProject(p: Project): boolean {
   return p.builtIn !== true;
@@ -2042,33 +2052,6 @@ function openNaturalLanguageCreate() {
   showNlModal.value = true;
 }
 
-async function quickAddTask() {
-  const text = quickAddRaw.value.trim();
-  if (!text) return;
-  const draft = parseNaturalLanguageTask(text);
-  if (!draft.title.trim()) {
-    message.warning(t('task.enterContent') || 'Please enter task content');
-    return;
-  }
-  const dueAt = draft.dueAtMs ? new Date(draft.dueAtMs).toISOString() : null;
-  const task = await store.addTask({
-    title: draft.title,
-    description: draft.description,
-    dueAt,
-    priority: draft.priority,
-    isImportant: draft.isImportant,
-    repeatRule: draft.repeatRule,
-    projectIds: selectedProjectId.value ? [selectedProjectId.value] : [],
-    tagIds: [],
-  });
-  if (task) {
-    message.success(t('task.createSuccess') || 'Task created');
-    quickAddRaw.value = "";
-  } else {
-    message.error(t('task.createFailed') || 'Failed to create task');
-  }
-}
-
 function openBlankFormFromNl() {
   showNlModal.value = false;
   openCreate();
@@ -2561,20 +2544,6 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 </script>
 
 <template>
-  <!-- Global quick add bar - fixed at top -->
-  <div class="quick-add-bar">
-    <NInput
-      v-model:value="quickAddRaw"
-      size="large"
-      :placeholder="t('task.quickAddPlaceholder')"
-      @keydown.enter.prevent="void quickAddTask()"
-    >
-      <template #prefix>
-        <span style="color: var(--tt-accent, #18a0ff); font-size: 18px; font-weight: 700;">+</span>
-      </template>
-    </NInput>
-  </div>
-
   <!-- Outer layout: narrow avatar+nav sidebar + main content area -->
   <NLayout has-sider style="min-height: 100vh; padding-top: 64px;" class="app-themed">
     <!-- Outer left sidebar: avatar + nav icons -->
@@ -2614,7 +2583,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               style="position: relative;"
               @click="activeNav = item.key"
             >
-              <span class="nav-icon">{{ item.icon }}</span>
+              <span v-if="item.key === 'calendar'" class="nav-icon calendar-nav-icon">{{ new Date().getDate() }}</span>
+              <span v-else class="nav-icon">{{ item.icon }}</span>
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
                 v-if="item.key === 'pomodoro' && todayPomodoros > 0 && activeNav !== 'pomodoro'"
@@ -3218,6 +3188,11 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
           </NSpace>
         </div>
 
+        <!-- Calendar view -->
+        <div v-else-if="activeNav === 'calendar'" class="calendar-view">
+          <CalendarView @edit-task="openEdit" />
+        </div>
+
         <!-- Stats view -->
         <div v-else-if="activeNav === 'stats'" class="stats-view">
           <NText strong style="font-size: 22px; margin-bottom: 24px; display: block">📊 {{ t('stats.title') || '统计概览' }}</NText>
@@ -3444,50 +3419,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
         <!-- 清单 view: task list -->
         <div v-else-if="activeNav === 'list'" class="list-view">
           <NSpace vertical :size="16" style="width: 100%">
-            <!-- Control row: view mode + notifications -->
-            <NSpace align="center" :size="8" wrap>
-              <NButton v-if="reminderEntries.length > 0" size="tiny" quaternary @click="openReminderModal">{{ t('nav.today') || 'Today' }} {{ t('task.setReminder') || 'reminder' }}</NButton>
-              <NButton size="tiny" quaternary :disabled="!canUndo" @click="void undo()">{{ t('common.undo') }}</NButton>
-              <NButton size="tiny" quaternary :disabled="!canRedo" @click="void redo()">{{ t('common.redo') }}</NButton>
-              <NSelect
-                v-model:value="taskSortMode"
-                size="tiny"
-                style="width: 130px"
-                :options="[
-                  { label: t('task.sortManual'), value: 'manual' },
-                  { label: t('task.sortPriority'), value: 'priority' },
-                  { label: t('task.sortCreatedAt'), value: 'createdAt' },
-                  { label: t('task.sortDueAt'), value: 'dueAt' },
-                  { label: t('task.sortTitle'), value: 'title' },
-                ]"
-              />
-              <NButton
-                size="tiny"
-                quaternary
-                :type="viewMode === 'kanban' ? 'primary' : 'default'"
-                @click="viewMode = viewMode === 'kanban' ? 'list' : 'kanban'"
-              >
-                {{ viewMode === 'kanban' ? t('common.listView') : t('common.kanbanView') }}
-              </NButton>
-              <NButton
-                size="tiny"
-                quaternary
-                :type="viewMode === 'calendar' ? 'primary' : 'default'"
-                @click="viewMode = viewMode === 'calendar' ? 'list' : 'calendar'"
-              >
-                {{ viewMode === 'calendar' ? t('common.listView') : t('common.calendarView') }}
-              </NButton>
-              <NButton
-                size="tiny"
-                quaternary
-                :type="auth.desktopNotifyEnabled ? 'default' : 'warning'"
-                @click="auth.toggleDesktopNotify()"
-              >
-                {{ auth.desktopNotifyEnabled ? t('common.notifyEnabled') : t('common.notifyDisabled') }}
-              </NButton>
-            </NSpace>
-
-            <div v-if="viewMode === 'list'" class="task-list-area">
+            <div v-if="auth.listViewMode === 'list'" class="task-list-area">
               <div v-if="listEmpty" class="inbox-empty">
                 <button type="button" class="inbox-fab" :aria-label="t('task.nlCreateTitle')" @click="openNaturalLanguageCreate">
                   +
@@ -3732,8 +3664,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               </div>
               </div>
             </div>
-            <CalendarView v-else-if="viewMode === 'calendar'" @edit-task="openEdit" />
-            <div v-else class="kanban-board">
+            <div v-if="auth.listViewMode === 'kanban'" class="kanban-board">
               <div v-for="col in kanbanBoard" :key="col.project.id" class="kanban-column">
                 <div class="kanban-column-header">
                   <span class="kanban-column-dot" :style="{ background: col.project.color || '#888' }"></span>
@@ -4932,16 +4863,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 
   <!-- 浮动按钮组 — 在清单视图显示 -->
   <div v-if="activeNav === 'list'" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; align-items: flex-end;">
-    <!-- 创建任务按钮 -->
-    <button
-      class="create-task-fab"
-      :title="t('task.create')"
-      @click="openCreate"
-    >
-      <span style="font-size: 28px; line-height: 1;">+</span>
-    </button>
     <!-- 番茄钟 -->
-    <PomodoroWidget />
+    <PomodoroWidget v-if="auth.pomodoroEnabled" />
   </div>
 </template>
 
@@ -5689,6 +5612,22 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 .nav-icon {
   font-size: 20px;
   line-height: 1;
+}
+.calendar-nav-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #36ad6a 0%, #2080f0 100%);
+  border-radius: 5px 5px 6px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  position: relative;
+  padding-top: 1px;
+  box-shadow: 0 2px 6px rgba(32, 128, 240, 0.3);
 }
 .nav-label {
   font-size: 10px;
