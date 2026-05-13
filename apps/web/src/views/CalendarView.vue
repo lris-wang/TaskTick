@@ -28,7 +28,6 @@ import {
   NText,
   useMessage,
   NPopconfirm,
-  NButtonGroup,
 } from "naive-ui";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -58,9 +57,6 @@ const viewYear = ref(today.getFullYear());
 const viewMonth = ref(today.getMonth()); // 0-indexed
 const viewType = ref<"month" | "week" | "day">("month");
 const viewDay = ref(today.getDate());
-const isMonthView = computed(() => viewType.value === "month");
-const isWeekView = computed(() => viewType.value === "week");
-const isDayView = computed(() => viewType.value === "day");
 
 // Fetch schedules when month changes
 watch(
@@ -200,31 +196,6 @@ function goToday() {
   viewDay.value = today.getDate();
 }
 
-function prevWeek() {
-  const d = new Date(viewYear.value, viewMonth.value, viewDay.value - 7);
-  viewYear.value = d.getFullYear();
-  viewMonth.value = d.getMonth();
-  viewDay.value = d.getDate();
-}
-function nextWeek() {
-  const d = new Date(viewYear.value, viewMonth.value, viewDay.value + 7);
-  viewYear.value = d.getFullYear();
-  viewMonth.value = d.getMonth();
-  viewDay.value = d.getDate();
-}
-function prevDay() {
-  const d = new Date(viewYear.value, viewMonth.value, viewDay.value - 1);
-  viewYear.value = d.getFullYear();
-  viewMonth.value = d.getMonth();
-  viewDay.value = d.getDate();
-}
-function nextDay() {
-  const d = new Date(viewYear.value, viewMonth.value, viewDay.value + 1);
-  viewYear.value = d.getFullYear();
-  viewMonth.value = d.getMonth();
-  viewDay.value = d.getDate();
-}
-
 async function downloadIcal() {
   const BASE = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
   const token = useAuthStore().token;
@@ -261,73 +232,6 @@ const PRIORITY_LABELS = computed(() => [
   t("calendar.priorityMedium"),
   t("calendar.priorityHigh"),
 ]);
-
-// ---- Week view data ----
-interface WeekDayCell {
-  date: Date;
-  key: string;
-  isToday: boolean;
-  isCurrentMonth: boolean;
-  dayOfWeek: string;
-  tasks: Task[];
-  schedules: Schedule[];
-  lunar: ReturnType<typeof getLunarInfo>;
-}
-
-const weekCells = computed<WeekDayCell[]>(() => {
-  const center = new Date(viewYear.value, viewMonth.value, viewDay.value);
-  const startOfWeek = new Date(center);
-  startOfWeek.setDate(center.getDate() - center.getDay()); // Sunday
-
-  const cells: WeekDayCell[] = [];
-  const todayKey = localDateKey(today);
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    const key = localDateKey(d);
-    cells.push({
-      date: d,
-      key,
-      isToday: key === todayKey,
-      isCurrentMonth: d.getMonth() === viewMonth.value,
-      dayOfWeek: DAY_NAMES.value[i],
-      tasks: tasksByDate.value.get(key) ?? [],
-      schedules: scheduleStore.schedulesByDate(key),
-      lunar: getLunarInfo(d),
-    });
-  }
-  return cells;
-});
-
-// ---- Day view: hourly timeline ----
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const dayDateKey = computed(() => localDateKey(new Date(viewYear.value, viewMonth.value, viewDay.value)));
-const dayHourTasks = computed(() => tasksByDate.value.get(dayDateKey.value) ?? []);
-const dayHourSchedules = computed(() => scheduleStore.schedulesByDate(dayDateKey.value));
-
-function scheduleStyle(s: Schedule): Record<string, string> {
-  const start = new Date(s.startAt);
-  const end = s.endAt ? new Date(s.endAt) : new Date(start.getTime() + 60 * 60 * 1000);
-  const startMin = start.getHours() * 60 + start.getMinutes();
-  const endMin = end.getHours() * 60 + end.getMinutes();
-  const top = (startMin / (24 * 60)) * 100;
-  const height = Math.max(((endMin - startMin) / (24 * 60)) * 100, 2);
-  return {
-    position: "absolute",
-    top: `${top}%`,
-    height: `${height}%`,
-    left: "0",
-    right: "0",
-    background: "rgba(59, 130, 246, 0.15)",
-    borderLeft: `2px solid var(--tt-accent, #3b82f6)`,
-    borderRadius: "4px",
-    padding: "2px 6px",
-    fontSize: "12px",
-    overflow: "hidden",
-    color: "var(--tt-sidebar-text, #e8edf4)",
-  };
-}
 
 // ---- 选中日期弹窗 ----
 const showDayModal = ref(false);
@@ -491,24 +395,15 @@ function priorityColor(p: number): string {
     <!-- Header -->
     <div class="cal-header">
       <NSpace align="center" :size="12">
-        <NButtonGroup size="small">
-          <NButton :type="viewType === 'month' ? 'primary' : 'default'" @click="viewType = 'month'">{{ t("calendar.month") }}</NButton>
-          <NButton :type="viewType === 'week' ? 'primary' : 'default'" @click="viewType = 'week'">{{ t("calendar.week") }}</NButton>
-          <NButton :type="viewType === 'day' ? 'primary' : 'default'" @click="viewType = 'day'">{{ t("calendar.day") }}</NButton>
-        </NButtonGroup>
+        <NButton type="primary" size="small">{{ t("calendar.month") }}</NButton>
         <NText strong style="font-size: 16px">{{ viewDateLabel }}</NText>
         <NButton size="small" quaternary @click="goToday">{{ t("calendar.today") }}</NButton>
       </NSpace>
       <NSpace :size="8">
-        <NButton v-if="isMonthView" size="small" quaternary @click="prevMonth">‹ {{ t("calendar.previousMonth") }}</NButton>
-        <NButton v-if="isMonthView" size="small" quaternary @click="nextMonth">{{ t("calendar.nextMonth") }} ›</NButton>
-        <NButton v-if="isWeekView" size="small" quaternary @click="prevWeek">‹ {{ t("calendar.previousWeek") }}</NButton>
-        <NButton v-if="isWeekView" size="small" quaternary @click="nextWeek">{{ t("calendar.nextWeek") }} ›</NButton>
-        <NButton v-if="isDayView" size="small" quaternary @click="prevDay">‹ {{ t("calendar.previousDay") }}</NButton>
-        <NButton v-if="isDayView" size="small" quaternary @click="nextDay">{{ t("calendar.nextDay") }} ›</NButton>
+        <NButton size="small" quaternary @click="prevMonth">‹ {{ t("calendar.previousMonth") }}</NButton>
+        <NButton size="small" quaternary @click="nextMonth">{{ t("calendar.nextMonth") }} ›</NButton>
         <NButton size="small" quaternary type="default" @click="downloadIcal">📥 {{ t("calendar.exportICal") }}</NButton>
       </NSpace>
-    </div>
     </div>
 
     <!-- Day-of-week header -->
@@ -519,7 +414,7 @@ function priorityColor(p: number): string {
     </div>
 
     <!-- Month View -->
-    <div v-if="isMonthView" class="cal-grid">
+    <div class="cal-grid">
       <div
         v-for="cell in calendarCells"
         :key="cell.key"
@@ -575,106 +470,6 @@ function priorityColor(p: number): string {
           {{ taskCountLabel(cell) }}
         </div>
     </div>
-
-    <!-- Week View -->
-    <div v-if="isWeekView" class="week-grid">
-      <div
-        v-for="cell in weekCells"
-        :key="cell.key"
-        class="week-cell"
-        :class="{
-          'week-cell--other-month': !cell.isCurrentMonth,
-          'week-cell--today': cell.isToday,
-        }"
-        @click="openDayModal(cell.date)"
-      >
-        <div class="week-cell-header">
-          <NText depth="3" style="font-size: 11px">{{ cell.dayOfWeek }}</NText>
-          <div
-            class="week-cell-day"
-            :class="{
-              'week-cell-day--today': cell.isToday,
-              'week-cell-day--weekend': cell.lunar.isWeekend,
-            }"
-          >
-            {{ cell.date.getDate() }}
-          </div>
-          <div
-            v-if="cell.lunar.isHoliday"
-            class="week-cell-holiday"
-            :class="{ 'week-cell-holiday--workday': cell.lunar.isWorkday }"
-          >{{ cell.lunar.holidayName }}</div>
-          <div v-else-if="cell.lunar.shortLabel" class="week-cell-lunar">{{ cell.lunar.shortLabel }}</div>
-        </div>
-        <div class="week-cell-tasks">
-          <div
-            v-for="t in cell.tasks.slice(0, 4)"
-            :key="t.id"
-            class="week-task-chip"
-            :style="{ borderLeftColor: priorityColor(t.priority) }"
-            :title="t.title"
-            @click.stop="onEditTask(t)"
-          >
-            {{ t.title }}
-          </div>
-          <div v-if="cell.tasks.length > 4" class="week-task-overflow">
-            +{{ cell.tasks.length - 4 }} {{ t("calendar.more") }}
-          </div>
-          <div
-            v-for="s in cell.schedules.slice(0, 2)"
-            :key="s.id"
-            class="week-schedule-chip"
-          >
-            🗓 {{ s.title }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Day View -->
-    <div v-if="isDayView" class="day-view">
-      <div class="day-hour-column">
-        <div
-          v-for="hour in HOURS"
-          :key="hour"
-          class="day-hour-row"
-        >
-          <div class="day-hour-label">{{ String(hour).padStart(2, "0") }}:00</div>
-          <div class="day-hour-content">
-            <div
-              v-for="s in dayHourSchedules.filter(s => {
-                const h = new Date(s.startAt).getHours();
-                return h === hour;
-              })"
-              :key="s.id"
-              :style="scheduleStyle(s)"
-              class="day-schedule-block"
-            >
-              <NText style="font-size: 11px; font-weight: 500">{{ s.title }}</NText>
-              <NText depth="3" style="font-size: 10px">
-                {{ new Date(s.startAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit' }) }}
-                <span v-if="s.endAt"> - {{ new Date(s.endAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit' }) }}</span>
-              </NText>
-            </div>
-            <div
-              v-for="t in dayHourTasks"
-              :key="t.id"
-              class="day-task-item"
-              :style="{ borderLeftColor: priorityColor(t.priority) }"
-              @click.stop="onEditTask(t)"
-            >
-              <NCheckbox
-                :checked="t.completed"
-                size="small"
-                @update:checked="() => store.toggleComplete(t.id)"
-              />
-              <NText :style="{ textDecoration: t.completed ? 'line-through' : 'none', opacity: t.completed ? 0.5 : 1 }">
-                {{ t.title }}
-              </NText>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 选中日期的任务列表（侧边/弹窗） -->
