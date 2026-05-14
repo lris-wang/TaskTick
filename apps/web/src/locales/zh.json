@@ -589,7 +589,7 @@
     "deploymentModeHint": "选择连接到云端服务器或运行本地 API 服务器",
     "cloudMode": "云端",
     "localMode": "本地",
-    "localModeVipOnly": "本地模式仅限 VIP 会员使用",
+    "cloudModeVipOnly": "云端模式仅限 VIP 会员使用",
     "localeNameId": "印尼语"
   },
   "calendar": {

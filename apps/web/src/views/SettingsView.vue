@@ -1197,28 +1197,26 @@ function onLocaleChange(locale: string) {
             <div class="mode-toggle">
               <button
                 class="mode-btn"
-                :class="{ 'mode-btn--active': auth.deploymentMode === 'cloud' }"
-                @click="auth.setDeploymentMode('cloud')"
+                :class="{
+                  'mode-btn--active': auth.deploymentMode === 'cloud',
+                  'mode-btn--disabled': !auth.isVip
+                }"
+                :disabled="!auth.isVip"
+                :title="!auth.isVip ? t('settings.cloudModeVipOnly') : ''"
+                @click="auth.isVip && auth.setDeploymentMode('cloud')"
               >
-                <span class="mode-icon">☁️</span>
                 <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
               </button>
               <button
                 class="mode-btn"
-                :class="{
-                  'mode-btn--active': auth.deploymentMode === 'local',
-                  'mode-btn--disabled': !auth.isVip
-                }"
-                :disabled="!auth.isVip"
-                :title="!auth.isVip ? t('settings.localModeVipOnly') : ''"
-                @click="auth.isVip && auth.setDeploymentMode('local')"
+                :class="{ 'mode-btn--active': auth.deploymentMode === 'local' }"
+                @click="auth.setDeploymentMode('local')"
               >
-                <span class="mode-icon">💻</span>
                 <NText :depth="auth.deploymentMode === 'local' ? 1 : 3" style="font-size:13px">{{ t('settings.localMode') }}</NText>
               </button>
             </div>
             <NText v-if="!auth.isVip" depth="3" style="font-size:12px;display:block;margin-top:12px">
-              {{ t('settings.localModeVipOnly') }}
+              {{ t('settings.cloudModeVipOnly') }}
             </NText>
           </NCard>
         </template>
@@ -1384,6 +1382,10 @@ function onLocaleChange(locale: string) {
   background: rgba(24, 160, 255, 0.1);
   box-shadow: 0 0 0 3px rgba(24, 160, 255, 0.15);
   color: var(--tt-accent, #18a0ff);
+}
+.mode-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .mode-icon {
   font-size: 18px;

@@ -576,7 +576,7 @@
     "deploymentModeHint": "Choose whether to connect to the cloud server or run a local API server",
     "cloudMode": "Cloud",
     "localMode": "Local",
-    "localModeVipOnly": "Local mode is only available for VIP members",
+    "cloudModeVipOnly": "Cloud mode is only available for VIP members",
     "sameAsOld": "New password cannot be the same as old password",
     "avatarUpdated": "Avatar updated",
     "avatarUpdateFailed": "Failed to update avatar",
