@@ -65,7 +65,10 @@ const themeOverrides = computed(() => {
   box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
 }
 
-/* NSwitch active state uses theme accent */
+/* NSwitch borders/shadow to show switch boundaries */
+.n-switch {
+  border: 1px solid var(--tt-subtle-border);
+}
 .n-switch.n-switch--active {
   --n-color: var(--tt-accent) !important;
 }
