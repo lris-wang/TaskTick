@@ -36,8 +36,8 @@ const themeOverrides = computed(() => {
       primaryColorSuppl: accent,
     } as Partial<ThemeCommonVars>,
     Switch: {
-      railColor: "rgba(255,255,255,0.12)",
-      railColorHover: "rgba(255,255,255,0.18)",
+      railColor: "rgba(128,128,128,0.3)",
+      railColorHover: "rgba(128,128,128,0.4)",
       railColorActive: accent,
       buttonColor: "#fff",
     },
