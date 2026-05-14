@@ -72,6 +72,7 @@ export interface ColorSchemeColors {
 export interface ColorScheme {
   id: string;
   name: string;
+  vipOnly?: boolean;
   dark: ColorSchemeColors;
   light: ColorSchemeColors;
 }
@@ -440,6 +441,7 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "lightBlue",
     name: "天空蓝",
+    vipOnly: true,
     dark: {
       sidebarBg: "linear-gradient(160deg, #0f1923 0%, #162032 100%)",
       sidebarBorder: "rgba(24, 160, 255, 0.15)",
@@ -500,6 +502,7 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "lightGreen",
     name: "薄荷绿",
+    vipOnly: true,
     dark: {
       sidebarBg: "linear-gradient(160deg, #0a1f14 0%, #0f3020 100%)",
       sidebarBorder: "rgba(34, 197, 94, 0.15)",
@@ -560,6 +563,7 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     id: "lightPink",
     name: "樱花粉",
+    vipOnly: true,
     dark: {
       sidebarBg: "linear-gradient(160deg, #1f0f18 0%, #321525 100%)",
       sidebarBorder: "rgba(236, 72, 153, 0.15)",

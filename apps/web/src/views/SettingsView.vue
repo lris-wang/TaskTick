@@ -765,8 +765,8 @@ function onLocaleChange(locale: string) {
               <button
                 v-for="scheme in COLOR_SCHEMES"
                 :key="scheme.id"
-                :class="['scheme-btn-wrapper', { 'scheme-btn--active': activeSchemeId === scheme.id }]"
-                @click="activeSchemeId = scheme.id; auth.persist()"
+                :class="['scheme-btn-wrapper', { 'scheme-btn--active': activeSchemeId === scheme.id, 'scheme-btn-wrapper--vip-locked': scheme.vipOnly && !auth.isVip }]"
+                @click="!scheme.vipOnly || auth.isVip ? (activeSchemeId = scheme.id, auth.persist()) : null"
               >
                 <div class="scheme-preview">
                   <div
@@ -787,7 +787,7 @@ function onLocaleChange(locale: string) {
                 >
                   {{ scheme.name }}
                 </NText>
-                <span v-if="themeMode === 'light'" class="scheme-crown">👑</span>
+                <span v-if="scheme.vipOnly" class="scheme-crown">👑</span>
               </button>
             </div>
 
@@ -1323,6 +1323,10 @@ function onLocaleChange(locale: string) {
 .scheme-btn-wrapper--active {
   border-color: var(--tt-accent, #18a0ff);
   box-shadow: 0 0 0 3px rgba(24, 160, 255, 0.2);
+}
+.scheme-btn-wrapper--vip-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .scheme-crown {
   position: absolute;
