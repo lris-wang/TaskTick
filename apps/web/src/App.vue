@@ -65,4 +65,8 @@ const themeOverrides = computed(() => {
   box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
 }
 
+/* NSwitch rail always shows accent color ring */
+.n-switch {
+  border: 1px solid var(--tt-accent) !important;
+}
 </style>
