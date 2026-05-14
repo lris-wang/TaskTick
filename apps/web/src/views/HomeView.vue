@@ -29,6 +29,24 @@ import {
   NUpload,
   useMessage,
 } from "naive-ui";
+import {
+  Timer,
+  BarChart3,
+  CalendarDays,
+  ListTodo,
+  Search,
+  Target,
+  FileText,
+  Trash2,
+  Settings,
+  LogOut,
+  Calendar,
+  CalendarRange,
+  Flame,
+  ArrowRight,
+  CheckSquare,
+  Inbox,
+} from "lucide-vue-next";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useVirtualizer } from "@tanstack/vue-virtual";
@@ -269,14 +287,14 @@ watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
 
 /** Sidebar module definitions */
 const NAV_MODULE_DEFS = [
-  { key: "pomodoro" as const, label: t('pomodoro.title'), icon: "🍅" },
-  { key: "stats" as const, label: t('stats.title'), icon: "📊" },
-  { key: "calendar" as const, label: t('calendar.title'), icon: "📅" },
-  { key: "list" as const, label: t('nav.all'), icon: "📋" },
-  { key: "search" as const, label: t('common.search'), icon: "🔍" },
-  { key: "habits" as const, label: t('habit.title'), icon: "🎯" },
-  { key: "notes" as const, label: t('note.title'), icon: "📝" },
-  { key: "trash" as const, label: t('trash.title'), icon: "🗑️" },
+  { key: "pomodoro" as const, label: t('pomodoro.title'), icon: Timer },
+  { key: "stats" as const, label: t('stats.title'), icon: BarChart3 },
+  { key: "calendar" as const, label: t('calendar.title'), icon: CalendarDays },
+  { key: "list" as const, label: t('nav.all'), icon: ListTodo },
+  { key: "search" as const, label: t('common.search'), icon: Search },
+  { key: "habits" as const, label: t('habit.title'), icon: Target },
+  { key: "notes" as const, label: t('note.title'), icon: FileText },
+  { key: "trash" as const, label: t('trash.title'), icon: Trash2 },
 ];
 
 /** Navigation modules in persistence order */
@@ -1509,13 +1527,13 @@ function isCustomProject(p: Project): boolean {
 }
 
 const builtinViews = [
-  { key: "today" as const, label: t('nav.today'), icon: "📅" },
-  { key: "planned" as const, label: t('nav.planned'), icon: "📆" },
-  { key: "engaged" as const, label: t('nav.engaged'), icon: "🔥" },
-  { key: "next" as const, label: t('nav.next'), icon: "🎯" },
-  { key: "all" as const, label: t('nav.all'), icon: "📋" },
-  { key: "completed" as const, label: t('nav.completed'), icon: "✅" },
-  { key: "inbox" as const, label: t('nav.inbox'), icon: "📥" },
+  { key: "today" as const, label: t('nav.today'), icon: Calendar },
+  { key: "planned" as const, label: t('nav.planned'), icon: CalendarRange },
+  { key: "engaged" as const, label: t('nav.engaged'), icon: Flame },
+  { key: "next" as const, label: t('nav.next'), icon: ArrowRight },
+  { key: "all" as const, label: t('nav.all'), icon: ListTodo },
+  { key: "completed" as const, label: t('nav.completed'), icon: CheckSquare },
+  { key: "inbox" as const, label: t('nav.inbox'), icon: Inbox },
 ];
 
 const customProjects = computed(() => {
@@ -2584,7 +2602,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @click="activeNav = item.key"
             >
               <span v-if="item.key === 'calendar'" class="nav-icon calendar-nav-icon">{{ new Date().getDate() }}</span>
-              <span v-else class="nav-icon">{{ item.icon }}</span>
+              <component v-else :is="item.icon" class="nav-icon" />
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
                 v-if="item.key === 'pomodoro' && todayPomodoros > 0 && activeNav !== 'pomodoro'"
@@ -2599,14 +2617,14 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
             :class="{ active: activeNav === 'settings' }"
             @click="router.push('/settings')"
           >
-            <span class="nav-icon">⚙️</span>
+            <Settings class="nav-icon" />
             <NText v-if="activeNav === 'settings'" class="nav-label">{{ t('settings.title') }}</NText>
           </NButton>
         </NSpace>
 
         <!-- Bottom: logout -->
         <NButton text class="nav-icon-btn" @click="logout" style="margin-top: auto">
-          <span class="nav-icon">🚪</span>
+          <LogOut class="nav-icon" />
         </NButton>
       </NSpace>
     </NLayoutSider>
@@ -2627,7 +2645,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @click="store.selectBuiltinView(view.key)"
             >
               <template #icon>
-                <span class="nav-icon">{{ view.icon }}</span>
+                <component :is="view.icon" class="nav-icon" />
               </template>
               {{ view.label }}
             </NButton>
@@ -5614,6 +5632,8 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 .nav-icon {
   font-size: 20px;
   line-height: 1;
+  width: 20px;
+  height: 20px;
 }
 .calendar-nav-icon {
   display: inline-flex;
