@@ -1198,7 +1198,7 @@ function onLocaleChange(locale: string) {
               <button
                 class="mode-btn"
                 :class="{
-                  'mode-btn--local': auth.deploymentMode === 'local',
+                  'mode-btn--local': auth.deploymentMode === 'cloud',
                   'mode-btn--disabled': !auth.isVip
                 }"
                 :disabled="!auth.isVip"
