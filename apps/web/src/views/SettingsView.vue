@@ -1366,7 +1366,7 @@ function onLocaleChange(locale: string) {
   gap: 6px;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(128, 128, 128, 0.5);
   background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
   color: var(--tt-sidebar-text-muted);
