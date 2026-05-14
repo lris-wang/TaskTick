@@ -36,8 +36,8 @@ const themeOverrides = computed(() => {
       primaryColorSuppl: accent,
     } as Partial<ThemeCommonVars>,
     Switch: {
-      railColor: accent,
-      railColorHover: accent,
+      railColor: "rgba(255,255,255,0.12)",
+      railColorHover: "rgba(255,255,255,0.18)",
       railColorActive: accent,
       buttonColor: "#fff",
     },
@@ -65,8 +65,5 @@ const themeOverrides = computed(() => {
   box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
 }
 
-/* NSwitch rail always shows accent color ring */
-.n-switch {
-  border: 1px solid var(--tt-accent) !important;
-}
+/* remove added border/shadow */
 </style>
