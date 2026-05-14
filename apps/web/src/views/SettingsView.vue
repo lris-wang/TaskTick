@@ -1208,7 +1208,7 @@ function onLocaleChange(locale: string) {
                 <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
               </button>
               <button
-                class="mode-btn"
+                class="mode-btn mode-btn--accent"
                 :class="{ 'mode-btn--active': auth.deploymentMode === 'local' }"
                 @click="auth.setDeploymentMode('local')"
               >
@@ -1386,6 +1386,9 @@ function onLocaleChange(locale: string) {
 .mode-btn--disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+.mode-btn--accent {
+  border-color: var(--tt-accent) !important;
 }
 .mode-icon {
   font-size: 18px;
