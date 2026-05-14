@@ -18,3 +18,4 @@ aiosmtplib>=3.0.0
 rrule
 alembic>=1.13.0
 webpush>=1.0.0
+"httpx>=0.25.0" 
