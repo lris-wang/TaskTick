@@ -1205,6 +1205,7 @@ function onLocaleChange(locale: string) {
                 @click="auth.isVip && auth.setDeploymentMode('cloud')"
               >
                 <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
+                <span v-if="!auth.isVip" style="margin-left:4px;font-size:11px;">👑</span>
               </button>
               <button
                 class="mode-btn mode-btn--local"
