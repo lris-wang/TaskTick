@@ -1374,14 +1374,14 @@ function onLocaleChange(locale: string) {
   font-size: 13px;
 }
 .mode-btn:hover {
-  border-color: var(--tt-accent, #18a0ff);
-  background: rgba(24, 160, 255, 0.06);
+  border-color: var(--tt-accent);
+  background: var(--tt-accent-bg);
 }
 .mode-btn--active {
-  border-color: var(--tt-accent, #18a0ff);
-  background: rgba(24, 160, 255, 0.1);
-  box-shadow: 0 0 0 3px rgba(24, 160, 255, 0.15);
-  color: var(--tt-accent, #18a0ff);
+  border-color: var(--tt-accent);
+  background: var(--tt-accent-bg);
+  box-shadow: 0 0 0 3px var(--tt-accent-bg);
+  color: var(--tt-accent);
 }
 .mode-btn--disabled {
   opacity: 0.4;
