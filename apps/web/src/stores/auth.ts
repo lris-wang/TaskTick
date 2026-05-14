@@ -206,12 +206,14 @@ export const useAuthStore = defineStore("auth", {
       this.username = username;
       this.email = email_;
       this.avatarUrl = data.avatar_url || null;
+      this.isVip = data.is_vip ?? false;
 
       const json = JSON.stringify({
         token: this.token,
         username: this.username,
         email: this.email,
         avatarUrl: this.avatarUrl,
+        isVip: this.isVip,
         desktopNotifyEnabled: this.desktopNotifyEnabled,
         themeAccentColor: this.themeAccentColor,
         themeMode: this.themeMode,
@@ -245,12 +247,14 @@ export const useAuthStore = defineStore("auth", {
       this.username = username;
       this.email = email_;
       this.avatarUrl = data.avatar_url || null;
+      this.isVip = data.is_vip ?? false;
 
       const json = JSON.stringify({
         token: this.token,
         username: this.username,
         email: this.email,
         avatarUrl: this.avatarUrl,
+        isVip: this.isVip,
         desktopNotifyEnabled: this.desktopNotifyEnabled,
         themeAccentColor: this.themeAccentColor,
         themeMode: this.themeMode,

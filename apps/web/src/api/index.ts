@@ -147,7 +147,7 @@ export async function ping(): Promise<boolean> {
 export async function login(
   email: string,
   password: string,
-): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string } | { error: string }> {
+): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string; is_vip: boolean } | { error: string }> {
   try {
     const res = await fetch(`${getApiBase()}/api/v1/auth/login`, {
       method: "POST",
@@ -167,7 +167,7 @@ export async function login(
 export async function phoneLogin(
   phone: string,
   password: string,
-): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string } | { error: string }> {
+): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string; is_vip: boolean } | { error: string }> {
   try {
     const res = await fetch(`${getApiBase()}/api/v1/auth/phone-login`, {
       method: "POST",
@@ -746,6 +746,19 @@ export async function changePassword(oldPassword: string, newPassword: string): 
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function setVip(userId: string, isVip: boolean): Promise<boolean> {
+  try {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/set-vip`, {
+      method: "POST",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, is_vip: isVip }),
     });
     return res.ok;
   } catch {

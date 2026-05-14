@@ -33,6 +33,7 @@ class TokenResponse(BaseModel):
     email: str
     username: str
     avatar_url: str = ""
+    is_vip: bool = False
 
 
 class UserResponse(BaseModel):
@@ -40,6 +41,7 @@ class UserResponse(BaseModel):
     email: str | None
     username: str
     avatar_url: str = ""
+    is_vip: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -81,3 +83,8 @@ class PhoneRegisterRequest(BaseModel):
 
 class SendPhoneVerifyCodeRequest(BaseModel):
     phone: str
+
+
+class SetVipRequest(BaseModel):
+    user_id: str
+    is_vip: bool

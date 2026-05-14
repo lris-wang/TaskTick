@@ -1,5 +1,5 @@
 from typing import Annotated
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 import logging
 from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
@@ -245,6 +245,7 @@ async def login(
         email=user.email,
         username=user.username,
         avatar_url=user.avatar_url,
+        is_vip=user.is_vip,
     )
 
 
@@ -268,6 +269,7 @@ async def phone_login(
         email=user.email,
         username=user.username,
         avatar_url=user.avatar_url,
+        is_vip=user.is_vip,
     )
 
 
@@ -461,3 +463,20 @@ async def change_password(
     current_user.password_hash = hash_password(body.new_password)
     session.add(current_user)
     await session.commit()
+
+
+@router.post("/set-vip")
+async def set_vip(
+    body: SetVipRequest,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """
+    设置用户VIP状态（仅用于管理员操作）。
+    """
+    result = await session.execute(select(User).where(User.id == uuid.UUID(body.user_id)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+    user.is_vip = body.is_vip
+    await session.commit()
+    return {"ok": True, "is_vip": user.is_vip}
