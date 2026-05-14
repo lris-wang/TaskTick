@@ -2602,7 +2602,11 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               style="position: relative;"
               @click="activeNav = item.key"
             >
-              <component v-if="item.key === 'calendar'" :is="item.icon" class="nav-icon" />
+              <span v-if="item.key === 'calendar'" class="calendar-icon-wrapper">
+                <CalendarDays class="calendar-sun-icon" />
+                <span class="calendar-day-number">{{ new Date().getDate() }}</span>
+              </span>
+              <component v-else :is="item.icon" class="nav-icon" />
               <component v-else :is="item.icon" class="nav-icon" />
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
@@ -2646,10 +2650,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @click="store.selectBuiltinView(view.key)"
             >
               <template #icon>
-                <span v-if="view.key === 'today'" class="calendar-icon-wrapper">
-                  <Sun class="calendar-sun-icon" />
-                  <span class="calendar-day-number">{{ new Date().getDate() }}</span>
-                </span>
+                <Sun v-if="view.key === 'today'" class="nav-icon" />
                 <component v-else :is="view.icon" class="nav-icon" />
               </template>
               {{ view.label }}
