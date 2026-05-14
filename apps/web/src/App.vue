@@ -65,8 +65,9 @@ const themeOverrides = computed(() => {
   box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
 }
 
-/* NSwitch always shows accent color ring */
+/* NSwitch always shows accent color ring, same border-radius as mode-btn */
 .n-switch {
   border: 1px solid var(--tt-accent) !important;
+  border-radius: 10px;
 }
 </style>
