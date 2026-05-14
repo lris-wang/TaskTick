@@ -1366,7 +1366,7 @@ function onLocaleChange(locale: string) {
   gap: 6px;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 2px solid var(--tt-accent) !important;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
   color: var(--tt-sidebar-text-muted);
@@ -1378,7 +1378,7 @@ function onLocaleChange(locale: string) {
   background: var(--tt-accent-bg);
 }
 .mode-btn--active {
-  border-color: var(--tt-accent);
+  border-color: var(--tt-accent) !important;
   background: var(--tt-accent-bg);
   box-shadow: 0 0 0 3px var(--tt-accent-bg);
   color: var(--tt-accent);
