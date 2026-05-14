@@ -5619,7 +5619,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 26px;
   height: 26px;
   background: var(--tt-accent);
@@ -5628,7 +5628,6 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   font-weight: 700;
   color: #fff;
   position: relative;
-  padding-top: 1px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 .nav-label {
