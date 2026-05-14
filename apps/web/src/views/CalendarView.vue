@@ -278,7 +278,6 @@ function openFormFromNl() {
     <!-- Header -->
     <div class="cal-header">
       <NSpace align="center" :size="12">
-        <NButton type="primary" size="small">{{ t("calendar.month") }}</NButton>
         <NText strong style="font-size: 16px">{{ viewDateLabel }}</NText>
         <NButton size="small" quaternary @click="goToday">{{ t("calendar.today") }}</NButton>
       </NSpace>
