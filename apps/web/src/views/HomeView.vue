@@ -5647,19 +5647,17 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--tt-accent);
-  border-radius: 6px;
 }
 .calendar-sun-icon {
   width: 18px;
   height: 18px;
-  color: #fff;
+  color: var(--tt-sidebar-active-text);
 }
 .calendar-day-number {
   position: absolute;
   font-size: 9px;
   font-weight: 700;
-  color: #fff;
+  color: var(--tt-sidebar-active-text);
   bottom: 1px;
   right: 3px;
 }
