@@ -290,7 +290,7 @@ watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
 const NAV_MODULE_DEFS = [
   { key: "pomodoro" as const, label: t('pomodoro.title'), icon: Timer },
   { key: "stats" as const, label: t('stats.title'), icon: BarChart3 },
-  { key: "calendar" as const, label: t('nav.today'), icon: Sun },
+  { key: "calendar" as const, label: t('calendar.title'), icon: CalendarDays },
   { key: "list" as const, label: t('nav.all'), icon: ListTodo },
   { key: "search" as const, label: t('common.search'), icon: Search },
   { key: "habits" as const, label: t('habit.title'), icon: Target },
@@ -2602,10 +2602,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               style="position: relative;"
               @click="activeNav = item.key"
             >
-              <span v-if="item.key === 'calendar'" class="calendar-icon-wrapper">
-                <Sun class="calendar-sun-icon" />
-                <span class="calendar-day-number">{{ new Date().getDate() }}</span>
-              </span>
+              <component v-if="item.key === 'calendar'" :is="item.icon" class="nav-icon" />
               <component v-else :is="item.icon" class="nav-icon" />
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
@@ -2649,7 +2646,11 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               @click="store.selectBuiltinView(view.key)"
             >
               <template #icon>
-                <component :is="view.icon" class="nav-icon" />
+                <span v-if="view.key === 'today'" class="calendar-icon-wrapper">
+                  <Sun class="calendar-sun-icon" />
+                  <span class="calendar-day-number">{{ new Date().getDate() }}</span>
+                </span>
+                <component v-else :is="view.icon" class="nav-icon" />
               </template>
               {{ view.label }}
             </NButton>
