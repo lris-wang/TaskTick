@@ -1529,6 +1529,10 @@ function onLocaleChange(locale: string) {
 }
 
 /* Settings sidebar - NMenu uses theme accent color */
+.settings-body :deep(.n-layout-sider) {
+  border: 1px solid var(--tt-subtle-border);
+  border-radius: 12px;
+}
 .settings-body :deep(.n-menu) {
   --n-item-text-color: var(--tt-sidebar-text-muted);
   --n-item-text-color-hover: var(--tt-accent);
