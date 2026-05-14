@@ -5657,6 +5657,11 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   max-width: 640px;
   margin: 0 auto;
 }
+.search-view :deep(.n-input:focus),
+.search-view :deep(.n-input--focused) {
+  border-color: var(--tt-accent) !important;
+  box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
+}
 .search-results .task-row {
   display: flex;
   align-items: center;
