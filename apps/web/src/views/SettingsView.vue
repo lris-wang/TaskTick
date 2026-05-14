@@ -1196,7 +1196,7 @@ function onLocaleChange(locale: string) {
             </NText>
             <div class="mode-toggle">
               <button
-                class="mode-btn"
+                class="mode-btn mode-btn--cloud"
                 :class="{
                   'mode-btn--disabled': !auth.isVip
                 }"
@@ -1205,7 +1205,7 @@ function onLocaleChange(locale: string) {
                 @click="auth.isVip && auth.setDeploymentMode('cloud')"
               >
                 <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
-                <span v-if="!auth.isVip" style="margin-left:4px;font-size:11px;">👑</span>
+                <span v-if="!auth.isVip" class="crown-icon">👑</span>
               </button>
               <button
                 class="mode-btn mode-btn--local"
@@ -1389,6 +1389,15 @@ function onLocaleChange(locale: string) {
 }
 .mode-btn--local {
   border-color: var(--tt-accent) !important;
+}
+.mode-btn--cloud {
+  position: relative;
+}
+.crown-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 12px;
 }
 .mode-icon {
   font-size: 18px;
