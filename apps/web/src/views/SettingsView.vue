@@ -765,8 +765,7 @@ function onLocaleChange(locale: string) {
               <button
                 v-for="scheme in COLOR_SCHEMES"
                 :key="scheme.id"
-                class="scheme-btn"
-                :class="{ 'scheme-btn--active': activeSchemeId === scheme.id }"
+                :class="['scheme-btn-wrapper', { 'scheme-btn--active': activeSchemeId === scheme.id }]"
                 @click="activeSchemeId = scheme.id; auth.persist()"
               >
                 <div class="scheme-preview">
@@ -788,6 +787,7 @@ function onLocaleChange(locale: string) {
                 >
                   {{ scheme.name }}
                 </NText>
+                <span v-if="themeMode === 'light'" class="scheme-crown">👑</span>
               </button>
             </div>
 
@@ -1303,7 +1303,8 @@ function onLocaleChange(locale: string) {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
-.scheme-btn {
+.scheme-btn-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1313,6 +1314,21 @@ function onLocaleChange(locale: string) {
   background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
   transition: all 0.2s ease;
+}
+.scheme-btn-wrapper:hover {
+  border-color: var(--tt-accent, #18a0ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.scheme-btn-wrapper--active {
+  border-color: var(--tt-accent, #18a0ff);
+  box-shadow: 0 0 0 3px rgba(24, 160, 255, 0.2);
+}
+.scheme-crown {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 11px;
 }
 .scheme-btn:hover {
   border-color: var(--tt-accent, #18a0ff);
