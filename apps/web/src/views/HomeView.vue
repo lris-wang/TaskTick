@@ -2607,7 +2607,6 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
                 <span class="calendar-day-number">{{ new Date().getDate() }}</span>
               </span>
               <component v-else :is="item.icon" class="nav-icon" />
-              <component v-else :is="item.icon" class="nav-icon" />
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
                 v-if="item.key === 'pomodoro' && todayPomodoros > 0 && activeNav !== 'pomodoro'"
