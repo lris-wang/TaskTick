@@ -1198,7 +1198,6 @@ function onLocaleChange(locale: string) {
               <button
                 class="mode-btn"
                 :class="{
-                  'mode-btn--local': auth.deploymentMode === 'cloud',
                   'mode-btn--disabled': !auth.isVip
                 }"
                 :disabled="!auth.isVip"
@@ -1208,8 +1207,8 @@ function onLocaleChange(locale: string) {
                 <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
               </button>
               <button
-                class="mode-btn"
-                :class="{ 'mode-btn--local': auth.deploymentMode === 'local' }"
+                class="mode-btn mode-btn--local"
+                :class="{ 'mode-btn--active': auth.deploymentMode === 'local' }"
                 @click="auth.setDeploymentMode('local')"
               >
                 <NText :depth="auth.deploymentMode === 'local' ? 1 : 3" style="font-size:13px">{{ t('settings.localMode') }}</NText>
