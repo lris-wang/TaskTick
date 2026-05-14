@@ -1527,4 +1527,14 @@ function onLocaleChange(locale: string) {
 .features-section {
   padding: 8px 0;
 }
+
+/* Settings sidebar - NMenu uses theme accent color */
+.settings-body :deep(.n-menu) {
+  --n-item-text-color: var(--tt-sidebar-text-muted);
+  --n-item-text-color-hover: var(--tt-accent);
+  --n-item-text-color-active: var(--tt-accent);
+  --n-item-color-hover: var(--tt-accent-bg);
+  --n-item-color-active: var(--tt-accent-bg);
+  --n-border-color: transparent;
+}
 </style>
