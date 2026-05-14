@@ -1366,10 +1366,10 @@ function onLocaleChange(locale: string) {
   gap: 6px;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid var(--tt-accent-border);
   background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
-  color: #888;
+  color: var(--tt-sidebar-text-muted);
   transition: all 0.2s ease;
   font-size: 13px;
 }
