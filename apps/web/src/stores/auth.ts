@@ -20,6 +20,18 @@ export interface AuthPersisted {
   themeMode?: "dark" | "light";
   /** 侧边栏模块顺序 */
   sidebarModuleOrder?: string[];
+  /** 番茄钟功能开关 */
+  pomodoroEnabled?: boolean;
+  /** 列表显示模式："list" | "kanban"（默认 "list"） */
+  listViewMode?: "list" | "kanban";
+  /** 习惯追踪功能开关 */
+  habitsEnabled?: boolean;
+  /** 统计概览功能开关 */
+  statsEnabled?: boolean;
+  /** 笔记功能开关 */
+  notesEnabled?: boolean;
+  /** 列表默认排序模式 */
+  listSortMode?: "manual" | "priority" | "createdAt" | "dueAt" | "title";
 }
 
 /** 获取或生成设备 ID */
@@ -57,6 +69,11 @@ function loadPersisted(): AuthPersisted | null {
       themeAccentColor: o.themeAccentColor as string | undefined,
       themeMode: o.themeMode as "dark" | "light" | undefined,
       sidebarModuleOrder: o.sidebarModuleOrder as string[] | undefined,
+      pomodoroEnabled: o.pomodoroEnabled as boolean | undefined,
+      habitsEnabled: o.habitsEnabled as boolean | undefined,
+      statsEnabled: o.statsEnabled as boolean | undefined,
+      notesEnabled: o.notesEnabled as boolean | undefined,
+      listSortMode: o.listSortMode as "manual" | "priority" | "createdAt" | "dueAt" | "title" | undefined,
     };
   } catch (err) {
     console.error("[auth] loadPersisted error:", err);
@@ -76,8 +93,20 @@ export const useAuthStore = defineStore("auth", {
     themeAccentColor: "blue",
     /** 主题模式，默认 "dark" */
     themeMode: "light" as "dark" | "light",
-    /** 侧边栏模块顺序，默认 [list, pomodoro, stats, search, habits, notes] */
-    sidebarModuleOrder: ["list", "pomodoro", "stats", "search", "habits", "notes"],
+    /** 侧边栏模块顺序，默认 [list, calendar, pomodoro, stats, search, habits, notes] */
+    sidebarModuleOrder: ["list", "calendar", "pomodoro", "stats", "search", "habits", "notes"],
+    /** 番茄钟功能开关，默认 false */
+    pomodoroEnabled: false,
+    /** 列表显示模式，默认 "list" */
+    listViewMode: "list" as "list" | "kanban",
+    /** 习惯追踪功能开关，默认 false */
+    habitsEnabled: false,
+    /** 看板功能开关，默认 false */
+    statsEnabled: false,
+    /** 笔记功能开关，默认 false */
+    notesEnabled: false,
+    /** 列表默认排序模式，默认 priority */
+    listSortMode: "priority" as "manual" | "priority" | "createdAt" | "dueAt" | "title",
     /** 是否已完成 hydrate（防止 beforeEach 在 hydrate 前执行） */
     hydrated: false,
   }),
@@ -86,25 +115,29 @@ export const useAuthStore = defineStore("auth", {
   },
   actions: {
     hydrate() {
-      // 如果已经有 token（已登录），不再从 localStorage 覆盖
-      if (this.token) {
-        this.hydrated = true;
-        return;
-      }
       const p = loadPersisted();
       console.log("[auth] hydrate:", p ? `loaded token=${p.token.slice(0, 20)}...` : "null");
       if (!p) {
         this.hydrated = true;
         return;
       }
-      this.token = p.token;
-      this.username = p.username;
-      this.email = p.email ?? null;
-      this.avatarUrl = p.avatarUrl ?? null;
+      // 如果已经有 token（已登录），不再从 localStorage 覆盖认证状态
+      if (!this.token) {
+        this.token = p.token;
+        this.username = p.username;
+        this.email = p.email ?? null;
+        this.avatarUrl = p.avatarUrl ?? null;
+      }
       this.desktopNotifyEnabled = p.desktopNotifyEnabled ?? true;
       this.themeAccentColor = p.themeAccentColor ?? "blue";
       this.themeMode = p.themeMode ?? "light";
-      this.sidebarModuleOrder = p.sidebarModuleOrder ?? ["list", "pomodoro", "stats", "search", "habits", "notes"];
+      this.sidebarModuleOrder = p.sidebarModuleOrder ?? ["list", "calendar", "pomodoro", "stats", "search", "habits", "notes"];
+      this.pomodoroEnabled = p.pomodoroEnabled ?? false;
+      this.listViewMode = p.listViewMode ?? "list";
+      this.habitsEnabled = p.habitsEnabled ?? false;
+      this.statsEnabled = p.statsEnabled ?? false;
+      this.notesEnabled = p.notesEnabled ?? false;
+      this.listSortMode = p.listSortMode ?? "priority";
       this.hydrated = true;
       console.log("[auth] hydrate done, isLoggedIn=", this.isLoggedIn);
     },
@@ -124,6 +157,12 @@ export const useAuthStore = defineStore("auth", {
           themeAccentColor: this.themeAccentColor,
           themeMode: this.themeMode,
           sidebarModuleOrder: this.sidebarModuleOrder,
+          pomodoroEnabled: this.pomodoroEnabled,
+          listViewMode: this.listViewMode,
+          habitsEnabled: this.habitsEnabled,
+          statsEnabled: this.statsEnabled,
+          notesEnabled: this.notesEnabled,
+          listSortMode: this.listSortMode,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(body));
       } catch (err) {
@@ -234,6 +273,34 @@ export const useAuthStore = defineStore("auth", {
     },
     toggleDesktopNotify() {
       this.desktopNotifyEnabled = !this.desktopNotifyEnabled;
+      this.persist();
+    },
+    togglePomodoro() {
+      this.pomodoroEnabled = !this.pomodoroEnabled;
+      this.persist();
+    },
+    toggleListViewMode() {
+      this.listViewMode = this.listViewMode === "list" ? "kanban" : "list";
+      this.persist();
+    },
+    toggleHabits() {
+      this.habitsEnabled = !this.habitsEnabled;
+      this.persist();
+    },
+    toggleKanban() {
+      this.statsEnabled = !this.statsEnabled;
+      this.persist();
+    },
+    toggleNotes() {
+      this.notesEnabled = !this.notesEnabled;
+      this.persist();
+    },
+    toggleStats() {
+      this.statsEnabled = !this.statsEnabled;
+      this.persist();
+    },
+    setListSortMode(mode: "manual" | "priority" | "createdAt" | "dueAt" | "title") {
+      this.listSortMode = mode;
       this.persist();
     },
   },

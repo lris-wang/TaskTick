@@ -28,3 +28,15 @@ const naiveTheme = computed<GlobalTheme | undefined>(() => {
     </NMessageProvider>
   </NConfigProvider>
 </template>
+
+<style>
+.n-input:focus,
+.n-input:focus-within {
+  border-color: var(--tt-accent) !important;
+  box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
+}
+.n-input.n-input--focused {
+  border-color: var(--tt-accent) !important;
+  box-shadow: 0 0 0 2px var(--tt-accent-bg) !important;
+}
+</style>

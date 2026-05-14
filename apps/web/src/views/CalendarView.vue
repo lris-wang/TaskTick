@@ -17,39 +17,28 @@ function onEditTask(task: Task) {
 }
 import {
   NButton,
-  NCheckbox,
-  NDatePicker,
-  NDivider,
   NInput,
   NModal,
-  NSelect,
   NSpace,
-  NTag,
   NText,
   useMessage,
-  NPopconfirm,
 } from "naive-ui";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
+import { useRouter } from "vue-router";
 import { useTaskStore } from "../stores/task";
 import { useScheduleStore } from "../stores/schedule";
 import { useAuthStore } from "../stores/auth";
 import { dueCalendarKey, localDateKey } from "../utils/date";
 import { getOccurrencesInMonth, isRecurring } from "../utils/rrule";
 import { getLunarInfo } from "../composables/useLunar";
+import { parseNaturalLanguageTask } from "../utils/naturalLanguageTask";
 
+const { t } = useI18n();
+const router = useRouter();
 const message = useMessage();
 const store = useTaskStore();
 const scheduleStore = useScheduleStore();
-
-const projectSelectOptions = computed(() =>
-  store.projects
-    .filter((p) => !p.deletedAt)
-    .map((p) => ({ label: p.name, value: p.id })),
-);
 
 // ---- 当前日历月 ----
 const today = new Date();
@@ -174,6 +163,13 @@ const tasksByDate = computed(() => {
 });
 
 // ---- 月导航 ----
+function goToDay(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  router.push(`/calendar/${y}-${m}-${d}`);
+}
+
 function prevMonth() {
   if (viewMonth.value === 0) {
     viewMonth.value = 11;
@@ -226,147 +222,6 @@ const viewDateLabel = computed(() => {
   return `${viewYear.value} ${monthName}`;
 });
 
-const PRIORITY_LABELS = computed(() => [
-  "",
-  t("calendar.priorityLow"),
-  t("calendar.priorityMedium"),
-  t("calendar.priorityHigh"),
-]);
-
-// ---- 选中日期弹窗 ----
-const showDayModal = ref(false);
-const selectedDate = ref<Date | null>(null);
-const selectedDateKey = computed(() => selectedDate.value ? localDateKey(selectedDate.value) : null);
-// 日弹窗的任务（不包括子任务，子任务显示在父任务下）
-const selectedDateTasks = computed(() => {
-  if (!selectedDateKey.value) return [];
-  const key = selectedDateKey.value;
-  const [y, m, day] = key.split("-").map(Number);
-  const year = y;
-  const month = m - 1; // localDateKey uses 1-indexed month
-  const tasks: Task[] = [];
-  for (const t of store.tasks) {
-    if (t.deletedAt) continue;
-    if (t.parentId) continue; // 子任务不独立显示
-    if (isRecurring(t.repeatRule, false)) {
-      const days = getOccurrencesInMonth(t.repeatRule, false, year, month);
-      if (days.includes(day)) tasks.push(t);
-      continue;
-    }
-    const dk = dueCalendarKey(t.dueAt);
-    if (dk === key) tasks.push(t);
-  }
-  return tasks;
-});
-
-const formTitle = ref("");
-const formDueMs = ref<number | null>(null);
-const formProjectId = ref<string | null>(null);
-
-// Schedule form in day modal
-const showScheduleForm = ref(false);
-const scheduleTitle = ref("");
-const scheduleStartAt = ref<number | null>(null);
-const scheduleEndAt = ref<number | null>(null);
-
-// Project management in day modal
-const showProjectManage = ref(false);
-const pendingDeleteProjectId = ref<string | null>(null);
-
-// Used in template
-const askDeleteProject = (projectId: string) => {
-  pendingDeleteProjectId.value = projectId;
-};
-void askDeleteProject;
-
-async function confirmDeleteProject() {
-  if (!pendingDeleteProjectId.value) return;
-  const ok = await store.deleteProject(pendingDeleteProjectId.value);
-  if (!ok) {
-    message.error(t("project.deleteFailed"));
-  } else {
-    message.success(t("project.deleteSuccess"));
-    // If deleted project was selected, clear selection
-    if (formProjectId.value === pendingDeleteProjectId.value) {
-      const alive = store.projects.filter((p) => !p.deletedAt);
-      formProjectId.value = alive[0]?.id ?? null;
-    }
-  }
-  pendingDeleteProjectId.value = null;
-}
-
-function isCustomProject(projectId: string): boolean {
-  const p = store.projects.find((x) => x.id === projectId);
-  return p ? !p.builtIn : false;
-}
-
-const selectedDateSchedules = computed(() => {
-  if (!selectedDateKey.value) return [];
-  return scheduleStore.schedulesByDate(selectedDateKey.value);
-});
-
-function openDayModal(date: Date) {
-  selectedDate.value = date;
-  formTitle.value = "";
-  formDueMs.value = date.getTime();
-  // Default to first category
-  const alive = store.projects.filter((p) => !p.deletedAt);
-  formProjectId.value = alive[0]?.id ?? null;
-  scheduleTitle.value = "";
-  scheduleStartAt.value = date.getTime();
-  scheduleEndAt.value = null;
-  showScheduleForm.value = false;
-  showDayModal.value = true;
-}
-
-async function submitDaySchedule() {
-  const title = scheduleTitle.value.trim();
-  if (!title) {
-    message.warning(t("calendar.fillScheduleTitle"));
-    return;
-  }
-  if (!selectedDate.value || scheduleStartAt.value === null) return;
-
-  const ok = await scheduleStore.addSchedule({
-    title,
-    startAt: new Date(scheduleStartAt.value).toISOString(),
-    endAt: scheduleEndAt.value ? new Date(scheduleEndAt.value).toISOString() : null,
-  });
-  if (!ok) {
-    message.error(t("common.createFailed"));
-    return;
-  }
-  message.success(t("calendar.scheduleCreated"));
-  scheduleTitle.value = "";
-  scheduleStartAt.value = selectedDate.value.getTime();
-  scheduleEndAt.value = null;
-  showScheduleForm.value = false;
-}
-
-async function submitDayTask() {
-  const title = formTitle.value.trim();
-  if (!title) {
-    message.warning(t("task.enterContent"));
-    return;
-  }
-  if (!selectedDate.value) return;
-
-  const dueAt = new Date(selectedDate.value);
-  dueAt.setHours(23, 59, 59, 0);
-  const dueAtIso = dueAt.toISOString();
-
-  const ok = await store.addTask({
-    title,
-    dueAt: dueAtIso,
-    projectIds: formProjectId.value ? [formProjectId.value] : [],
-  });
-  if (!ok) {
-    message.error(t("task.createFailed"));
-    return;
-  }
-  message.success(t("task.createSuccess"));
-  showDayModal.value = false;
-}
 
 // ---- 高亮当日有任务 ----
 function dayHasTasks(cell: DayCell): boolean {
@@ -387,6 +242,34 @@ function priorityColor(p: number): string {
   if (p === 2) return "#f97316";
   if (p === 1) return "#22c55e";
   return "#6b7280";
+}
+
+// Natural language create
+const showNlModal = ref(false);
+const nlRaw = ref("");
+
+function goHomeOpenForm() {
+  showNlModal.value = false;
+  window.location.href = "/?blankForm=1";
+}
+
+function openFormFromNl() {
+  const draft = parseNaturalLanguageTask(nlRaw.value);
+  if (!draft.title.trim()) {
+    message.warning(t("task.nlHint") || "请描述任务内容");
+    return;
+  }
+  void store.addTask({
+    title: draft.title,
+    description: draft.description,
+    dueAt: draft.dueAtMs ? new Date(draft.dueAtMs).toISOString() : null,
+    priority: draft.priority,
+    isImportant: draft.isImportant,
+    repeatRule: draft.repeatRule,
+  });
+  message.success(t("task.taskCreatedFromNl") || "任务已创建");
+  nlRaw.value = "";
+  showNlModal.value = false;
 }
 </script>
 
@@ -424,7 +307,7 @@ function priorityColor(p: number): string {
           'cal-cell--today': cell.isToday,
           'cal-cell--has-tasks': dayHasTasks(cell),
         }"
-        @click="cell.isCurrentMonth && openDayModal(cell.date)"
+        @click="cell.isCurrentMonth && goToDay(cell.date)"
       >
         <div class="cal-cell-day" :class="{ 'cal-cell-day--weekend': cell.lunar.isWeekend }">
           <div class="cal-cell-day-num">{{ cell.date.getDate() }}</div>
@@ -472,132 +355,39 @@ function priorityColor(p: number): string {
     </div>
     </div>
 
-    <!-- 选中日期的任务列表（侧边/弹窗） -->
+    <!-- Floating + FAB -->
+    <div style="position: fixed; bottom: 24px; right: 24px; z-index: 1000;">
+      <button class="create-task-fab" :title="t('task.create')" @click="nlRaw = ''; showNlModal = true">
+        <span style="font-size: 28px; line-height: 1;">+</span>
+      </button>
+    </div>
+
+    <!-- NL Create Modal -->
     <NModal
-      v-model:show="showDayModal"
-      :title="selectedDate ? `${selectedDate.getMonth()+1}/${selectedDate.getDate()} ${t('calendar.taskAndScheduleFor')}` : ''"
-      style="width: min(440px, 90vw)"
+      v-model:show="showNlModal"
+      preset="card"
+      :title="t('task.nlCreateTitle') || '用自然语言创建任务'"
+      style="width: min(560px, 94vw)"
+      :mask-closable="false"
     >
-      <NSpace vertical :size="12" style="width: 100%">
-        <!-- 已有任务 -->
-        <div v-if="selectedDateTasks.length > 0" class="day-task-list">
-          <div
-            v-for="taskItem in selectedDateTasks"
-            :key="taskItem.id"
-            class="day-task-row"
-          >
-            <NCheckbox
-              :checked="taskItem.completed"
-              @update:checked="() => store.toggleComplete(taskItem.id)"
-            />
-            <NText
-              class="day-task-title"
-              :style="{ textDecoration: taskItem.completed ? 'line-through' : 'none', opacity: taskItem.completed ? 0.5 : 1 }"
-            >
-              {{ taskItem.title }}
-            </NText>
-            <NText v-if="taskItem.priority > 0" depth="3" style="font-size:12px">
-              {{ PRIORITY_LABELS[taskItem.priority] }}
-            </NText>
-          </div>
-        </div>
-        <NText v-else depth="3" style="font-size:13px">{{ t("calendar.noTasks") }}</NText>
-
-        <!-- 已有日程 -->
-        <div v-if="selectedDateSchedules.length > 0" class="day-task-list">
-          <div
-            v-for="s in selectedDateSchedules"
-            :key="s.id"
-            class="day-task-row"
-          >
-            <NText class="day-task-title">🗓 {{ s.title }}</NText>
-            <NText depth="3" style="font-size:12px" v-if="s.endAt">
-              {{ new Date(s.startAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit' }) }}
-              - {{ new Date(s.endAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit' }) }}
-            </NText>
-          </div>
-        </div>
-        <NText v-else-if="selectedDateTasks.length > 0" depth="3" style="font-size:13px">{{ t("calendar.noSchedules") }}</NText>
-
-        <NDivider style="margin: 4px 0" />
-
-        <!-- 快速添加任务 -->
-        <NSelect
-          v-model:value="formProjectId"
-          :options="projectSelectOptions"
-          :placeholder="t('calendar.selectProject')"
-          clearable
-          size="small"
-          style="width: 100%; margin-bottom: 6px"
-        />
-        <NInput
-          v-model:value="formTitle"
-          :placeholder="t('calendar.quickAddPlaceholder')"
-          size="small"
-          @keydown.enter.prevent="submitDayTask"
-        />
-        <NSpace style="margin-top: 6px">
-          <NButton type="primary" size="small" @click="submitDayTask">{{ t("calendar.addTask") }}</NButton>
-          <NButton size="small" @click="showScheduleForm = !showScheduleForm">
-            {{ showScheduleForm ? t('common.cancel') : '+ ' + t('calendar.addSchedule') }}
-          </NButton>
-          <NButton size="small" quaternary @click="showProjectManage = !showProjectManage">
-            {{ showProjectManage ? t('calendar.collapseCategories') : t('calendar.manageCategories') }}
-          </NButton>
+      <NText depth="3" style="display: block; margin-bottom: 10px; font-size: 13px; line-height: 1.5">
+        {{ t('task.nlCreateHint') }}
+      </NText>
+      <NInput
+        v-model:value="nlRaw"
+        type="textarea"
+        :placeholder="t('task.nlCreatePlaceholder') || '例：明天下午前把合同发给财务，这件事很重要。第二行可写补充说明。'"
+        :autosize="{ minRows: 6, maxRows: 14 }"
+      />
+      <template #footer>
+        <NSpace justify="space-between" style="width: 100%">
+          <NButton quaternary @click="goHomeOpenForm">{{ t('task.nlSkipBlank') }}</NButton>
+          <NSpace>
+            <NButton @click="showNlModal = false">{{ t('common.cancel') }}</NButton>
+            <NButton type="primary" @click="openFormFromNl">{{ t('task.nlParseAndFill') }}</NButton>
+          </NSpace>
         </NSpace>
-
-        <!-- 分类管理 -->
-        <template v-if="showProjectManage">
-          <NDivider style="margin: 8px 0 6px" />
-          <div class="project-manage-list">
-            <div
-              v-for="p in store.projects.filter((x) => !x.deletedAt)"
-              :key="p.id"
-              class="project-manage-row"
-            >
-              <NText style="flex: 1; font-size: 13px">{{ p.name }}</NText>
-              <NTag v-if="p.builtIn" size="small" round :bordered="false" type="default">{{ t("calendar.default") }}</NTag>
-              <NPopconfirm
-                v-if="isCustomProject(p.id)"
-                @positive-click="confirmDeleteProject"
-              >
-                <template #trigger>
-                  <NButton size="tiny" quaternary type="error">{{ t("calendar.delete") }}</NButton>
-                </template>
-                {{ t("calendar.confirmDelete") }}「{{ p.name }}」？
-              </NPopconfirm>
-            </div>
-          </div>
-        </template>
-
-        <!-- 日程表单 -->
-        <template v-if="showScheduleForm">
-          <NDivider style="margin: 4px 0" />
-          <NInput
-            v-model:value="scheduleTitle"
-            :placeholder="t('calendar.scheduleTitlePlaceholder')"
-          />
-          <NSpace>
-            <NText depth="3" style="font-size:12px">{{ t("calendar.start") }}</NText>
-            <NDatePicker
-              v-model:value="scheduleStartAt"
-              type="datetime"
-              :is-date="false"
-              style="width: 220px"
-            />
-          </NSpace>
-          <NSpace>
-            <NText depth="3" style="font-size:12px">{{ t("calendar.end") }}</NText>
-            <NDatePicker
-              v-model:value="scheduleEndAt"
-              type="datetime"
-              :is-date="false"
-              style="width: 220px"
-            />
-          </NSpace>
-          <NButton type="primary" size="small" @click="submitDaySchedule">{{ t("calendar.confirmAddSchedule") }}</NButton>
-        </template>
-      </NSpace>
+      </template>
     </NModal>
   </div>
 </template>
@@ -1006,5 +796,27 @@ function priorityColor(p: number): string {
   border-left: 2px solid #6b7280;
   margin-bottom: 2px;
   cursor: pointer;
+}
+.create-task-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--tt-accent);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.create-task-fab:hover {
+  background: var(--tt-accent-hover);
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+}
+.create-task-fab:active {
+  transform: scale(0.96);
 }
 </style>

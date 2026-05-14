@@ -66,6 +66,12 @@ export const router = createRouter({
       component: () => import("../views/SettingsView.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/calendar/:date",
+      name: "calendar-day",
+      component: () => import("../views/DayTimelineView.vue"),
+      meta: { requiresAuth: true },
+    },
   ],
 });
 

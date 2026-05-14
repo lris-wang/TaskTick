@@ -22,7 +22,7 @@ const { t } = useI18n();
 
 const SETTINGS_MENU_KEY = "tasktick.settings.activeMenu";
 const savedMenu = localStorage.getItem(SETTINGS_MENU_KEY);
-const validMenus = ["personal", "language", "theme", "notification", "backup"];
+const validMenus = ["personal", "language", "theme", "notification", "backup", "vip", "features"];
 const activeMenu = ref<string>(savedMenu && validMenus.includes(savedMenu) ? savedMenu : "personal");
 watch(activeMenu, (val) => localStorage.setItem(SETTINGS_MENU_KEY, val));
 
@@ -508,6 +508,8 @@ const menuOptions = computed(() => {
     { key: "theme", label: t('settings.theme') },
     { key: "notification", label: t('settings.notifications') },
     { key: "backup", label: t('settings.backup') },
+    { key: "vip", label: t('settings.vip') },
+    { key: "features", label: t('settings.features') },
   ];
 });
 
@@ -1097,6 +1099,90 @@ function onLocaleChange(locale: string) {
             </NSpace>
           </NModal>
         </template>
+
+        <!-- VIP -->
+        <template v-else-if="activeMenu === 'vip'">
+          <NCard class="settings-card" :bordered="false" size="large">
+            <template #header>
+              <NText strong style="font-size:15px">{{ t('settings.vip') }}</NText>
+            </template>
+            <div class="vip-section">
+              <div class="vip-icon">👑</div>
+              <NText strong style="font-size:16px;display:block;margin-bottom:8px">{{ t('settings.vipTitle') }}</NText>
+              <NText depth="3" style="font-size:13px;display:block;line-height:1.6;margin-bottom:16px">
+                {{ t('settings.vipDesc') }}
+              </NText>
+              <NButton type="primary" size="large">{{ t('settings.vipActivate') }}</NButton>
+            </div>
+          </NCard>
+        </template>
+
+        <!-- 功能 -->
+        <template v-else-if="activeMenu === 'features'">
+          <NCard class="settings-card" :bordered="false" size="large">
+            <template #header>
+              <NText strong style="font-size:15px">{{ t('settings.features') }}</NText>
+            </template>
+            <div class="features-section">
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.featurePomodoro') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.featurePomodoroHint') }}</NText>
+                </div>
+                <NSwitch :value="auth.pomodoroEnabled" @update:value="auth.togglePomodoro()" />
+              </div>
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.listViewMode') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.listViewModeHint') }}</NText>
+                </div>
+                <NSwitch :value="auth.listViewMode === 'kanban'" @update:value="() => {
+                  if (auth.listViewMode === 'kanban') { auth.listViewMode = 'list'; auth.persist(); } else { auth.listViewMode = 'kanban'; auth.persist(); }
+                }" />
+              </div>
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.featureHabits') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.featureHabitsHint') }}</NText>
+                </div>
+                <NSwitch :value="auth.habitsEnabled" @update:value="auth.toggleHabits()" />
+              </div>
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.featureStats') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.featureStatsHint') }}</NText>
+                </div>
+                <NSwitch :value="auth.statsEnabled" @update:value="auth.toggleStats()" />
+              </div>
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.featureNotes') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.featureNotesHint') }}</NText>
+                </div>
+                <NSwitch :value="auth.notesEnabled" @update:value="auth.toggleNotes()" />
+              </div>
+              <NDivider />
+              <div class="info-row">
+                <div>
+                  <NText style="font-size:14px">{{ t('settings.listSortMode') }}</NText>
+                  <NText depth="3" style="font-size:12px;display:block">{{ t('settings.listSortModeHint') }}</NText>
+                </div>
+                <NSelect
+                  style="width: 130px"
+                  :value="auth.listSortMode"
+                  :options="[
+                    { label: t('task.sortManual'), value: 'manual' },
+                    { label: t('task.sortPriority'), value: 'priority' },
+                    { label: t('task.sortCreatedAt'), value: 'createdAt' },
+                    { label: t('task.sortDueAt'), value: 'dueAt' },
+                    { label: t('task.sortTitle'), value: 'title' },
+                  ]"
+                  @update:value="(v) => auth.setListSortMode(v)"
+                />
+              </div>
+            </div>
+          </NCard>
+        </template>
       </div>
     </div>
   </div>
@@ -1384,5 +1470,20 @@ function onLocaleChange(locale: string) {
   font-size: 14px;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* VIP section */
+.vip-section {
+  text-align: center;
+  padding: 24px 0;
+}
+.vip-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+/* Features section */
+.features-section {
+  padding: 8px 0;
 }
 </style>

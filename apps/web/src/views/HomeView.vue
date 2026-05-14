@@ -4907,13 +4907,14 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   line-height: 1;
   font-weight: 300;
   color: #fff;
-  background: linear-gradient(145deg, #36ad6a 0%, #2080f0 100%);
-  box-shadow: 0 8px 28px rgba(32, 128, 240, 0.45);
+  background: var(--tt-accent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .inbox-fab:hover {
+  background: var(--tt-accent-hover);
   transform: scale(1.06);
-  box-shadow: 0 10px 32px rgba(32, 128, 240, 0.55);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
 }
 .inbox-fab:active {
   transform: scale(0.98);
@@ -4922,19 +4923,20 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #36ad6a 0%, #2080f0 100%);
+  background: var(--tt-accent);
   border: none;
   cursor: pointer;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 24px rgba(32, 128, 240, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .create-task-fab:hover {
+  background: var(--tt-accent-hover);
   transform: scale(1.08);
-  box-shadow: 0 8px 28px rgba(32, 128, 240, 0.5);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
 }
 .create-task-fab:active {
   transform: scale(0.96);
@@ -5579,7 +5581,7 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--tt-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5604,10 +5606,10 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
 }
 .nav-icon-btn:hover,
 .nav-icon-btn.active {
-  background: rgba(24, 160, 255, 0.12);
+  background: var(--tt-sidebar-active-bg);
 }
 .nav-icon-btn.active {
-  color: #18a0ff;
+  color: var(--tt-sidebar-active-text);
 }
 .nav-icon {
   font-size: 20px;
@@ -5620,14 +5622,14 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   justify-content: flex-start;
   width: 26px;
   height: 26px;
-  background: linear-gradient(135deg, #36ad6a 0%, #2080f0 100%);
+  background: var(--tt-accent);
   border-radius: 5px 5px 6px 6px;
   font-size: 12px;
   font-weight: 700;
   color: #fff;
   position: relative;
   padding-top: 1px;
-  box-shadow: 0 2px 6px rgba(32, 128, 240, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 .nav-label {
   font-size: 10px;
