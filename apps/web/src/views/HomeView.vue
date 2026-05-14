@@ -46,6 +46,7 @@ import {
   ArrowRight,
   CheckSquare,
   Inbox,
+  Sun,
 } from "lucide-vue-next";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
@@ -289,7 +290,7 @@ watch(activeNav, (val: NavValue) => localStorage.setItem(NAV_STORAGE_KEY, val));
 const NAV_MODULE_DEFS = [
   { key: "pomodoro" as const, label: t('pomodoro.title'), icon: Timer },
   { key: "stats" as const, label: t('stats.title'), icon: BarChart3 },
-  { key: "calendar" as const, label: t('calendar.title'), icon: CalendarDays },
+  { key: "calendar" as const, label: t('nav.today'), icon: Sun },
   { key: "list" as const, label: t('nav.all'), icon: ListTodo },
   { key: "search" as const, label: t('common.search'), icon: Search },
   { key: "habits" as const, label: t('habit.title'), icon: Target },
@@ -2601,7 +2602,10 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
               style="position: relative;"
               @click="activeNav = item.key"
             >
-              <span v-if="item.key === 'calendar'" class="nav-icon calendar-nav-icon">{{ new Date().getDate() }}</span>
+              <span v-if="item.key === 'calendar'" class="calendar-icon-wrapper">
+                <Sun class="calendar-sun-icon" />
+                <span class="calendar-day-number">{{ new Date().getDate() }}</span>
+              </span>
               <component v-else :is="item.icon" class="nav-icon" />
               <NText v-if="activeNav === item.key" class="nav-label">{{ item.label }}</NText>
               <span
@@ -5635,20 +5639,28 @@ function taskLunarInfo(dueAt: string | null): { label: string; isHoliday: boolea
   width: 20px;
   height: 20px;
 }
-.calendar-nav-icon {
+.calendar-icon-wrapper {
+  position: relative;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
   background: var(--tt-accent);
-  border-radius: 5px 5px 6px 6px;
-  font-size: 12px;
+  border-radius: 6px;
+}
+.calendar-sun-icon {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+.calendar-day-number {
+  position: absolute;
+  font-size: 9px;
   font-weight: 700;
   color: #fff;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  bottom: 1px;
+  right: 3px;
 }
 .nav-label {
   font-size: 10px;
