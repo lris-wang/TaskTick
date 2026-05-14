@@ -117,8 +117,8 @@ export const useAuthStore = defineStore("auth", {
     notesEnabled: false,
     /** 列表默认排序模式，默认 priority */
     listSortMode: "priority" as "manual" | "priority" | "createdAt" | "dueAt" | "title",
-    /** 部署模式，默认 "cloud" */
-    deploymentMode: "cloud" as "cloud" | "local",
+    /** 部署模式，默认 "local" */
+    deploymentMode: "local" as "cloud" | "local",
     /** 是否为 VIP，默认 false */
     isVip: false,
     /** 是否已完成 hydrate（防止 beforeEach 在 hydrate 前执行） */
@@ -152,7 +152,7 @@ export const useAuthStore = defineStore("auth", {
       this.statsEnabled = p.statsEnabled ?? false;
       this.notesEnabled = p.notesEnabled ?? false;
       this.listSortMode = p.listSortMode ?? "priority";
-      this.deploymentMode = p.deploymentMode ?? "cloud";
+      this.deploymentMode = p.deploymentMode ?? "local";
       this.isVip = p.isVip ?? false;
       this.hydrated = true;
       console.log("[auth] hydrate done, isLoggedIn=", this.isLoggedIn);
