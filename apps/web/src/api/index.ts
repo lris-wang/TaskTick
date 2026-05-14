@@ -9,7 +9,7 @@
 import type { Note, Project, ProjectGroup, Task, Tag, Team, TeamMember, Schedule, PomodoroSession } from "@tasktick/shared";
 import { useAuthStore } from "../stores/auth";
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
+import { getApiBase } from "../utils/apiBase";
 
 function authHeaders(): HeadersInit {
   const token = useAuthStore().token;
@@ -133,7 +133,7 @@ export function tagFromApi(raw: Record<string, unknown>): Tag {
 
 export async function ping(): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/health`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/health`, { headers: authHeaders() });
     return res.ok;
   } catch {
     return false;
@@ -149,7 +149,7 @@ export async function login(
   password: string,
 ): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string } | { error: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/login`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -169,7 +169,7 @@ export async function phoneLogin(
   password: string,
 ): Promise<{ access_token: string; token_type: string; id: string; email: string; username: string; avatar_url: string } | { error: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/phone-login`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/phone-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone, password }),
@@ -190,7 +190,7 @@ export async function register(
   password: string,
 ): Promise<{ id: string; email: string; username: string } | { error: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/register`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, username, password }),
@@ -207,7 +207,7 @@ export async function register(
 
 export async function sendResetCode(email: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/send-reset-code`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/send-reset-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -220,7 +220,7 @@ export async function sendResetCode(email: string): Promise<boolean> {
 
 export async function resetPassword(email: string, code: string, newPassword: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/reset-password`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, code, new_password: newPassword }),
@@ -233,7 +233,7 @@ export async function resetPassword(email: string, code: string, newPassword: st
 
 export async function sendVerifyCode(email: string): Promise<{ ok: boolean; error?: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/send-verify-code`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/send-verify-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -252,7 +252,7 @@ export async function uploadAvatar(file: File): Promise<string | null> {
   try {
     const form = new FormData();
     form.append("file", file);
-    const res = await fetch(`${BASE}/api/v1/auth/avatar-upload`, { method: "POST", body: form });
+    const res = await fetch(`${getApiBase()}/api/v1/auth/avatar-upload`, { method: "POST", body: form });
     if (!res.ok) return null;
     const data = await res.json();
     return (data as { avatar_url: string }).avatar_url ?? null;
@@ -269,7 +269,7 @@ export async function registerWithCode(
   avatarUrl?: string,
 ): Promise<{ id: string; email: string; username: string } | { error: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/register-with-code`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/register-with-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, code, password, username, avatar_url: avatarUrl ?? "" }),
@@ -286,7 +286,7 @@ export async function registerWithCode(
 
 export async function sendPhoneVerifyCode(phone: string): Promise<{ ok: boolean; error?: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/send-phone-verify-code`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/send-phone-verify-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone }),
@@ -308,7 +308,7 @@ export async function phoneRegister(
   username?: string,
 ): Promise<{ id: string; phone: string; username: string } | { error: string }> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/phone-register`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/phone-register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone, code, password, username }),
@@ -329,7 +329,7 @@ export async function phoneRegister(
 
 export async function fetchTasks(): Promise<Task[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/tasks`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => taskFromApi(r));
@@ -340,7 +340,7 @@ export async function fetchTasks(): Promise<Task[] | null> {
 
 export async function fetchDeletedTasks(): Promise<Task[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/trash`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/trash`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => taskFromApi(r));
@@ -351,7 +351,7 @@ export async function fetchDeletedTasks(): Promise<Task[] | null> {
 
 export async function restoreTask(id: string): Promise<Task | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/${id}/restore`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/${id}/restore`, {
       method: "POST",
       headers: authHeaders(),
     });
@@ -365,7 +365,7 @@ export async function restoreTask(id: string): Promise<Task | null> {
 
 export async function permanentDeleteTask(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/${id}/permanent`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/${id}/permanent`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -379,7 +379,7 @@ export async function createTask(
   payload: Omit<Task, "id" | "createdAt" | "updatedAt">,
 ): Promise<Task | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(taskToApi(payload)),
@@ -397,7 +397,7 @@ export async function updateTask(
   patch: Partial<Omit<Task, "id" | "createdAt">>,
 ): Promise<Task | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(taskToApi(patch)),
@@ -412,7 +412,7 @@ export async function updateTask(
 
 export async function deleteTask(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -424,7 +424,7 @@ export async function deleteTask(id: string): Promise<boolean> {
 
 export async function batchDeleteTasks(ids: string[]): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/batch-delete`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/batch-delete`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ task_ids: ids }),
@@ -446,7 +446,7 @@ export async function batchUpdateTasks(
   },
 ): Promise<Task[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tasks/batch`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tasks/batch`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ task_ids: ids, ...patch }),
@@ -465,7 +465,7 @@ export async function batchUpdateTasks(
 
 export async function fetchProjects(): Promise<Project[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/projects`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/projects`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => projectFromApi(r));
@@ -478,7 +478,7 @@ export async function createProject(
   payload: Pick<Project, "name" | "color" | "teamId">,
 ): Promise<Project | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/projects`, {
+    const res = await fetch(`${getApiBase()}/api/v1/projects`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -496,7 +496,7 @@ export async function updateProject(
   patch: Partial<Pick<Project, "name" | "color" | "teamId">>,
 ): Promise<Project | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/projects/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/projects/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -511,7 +511,7 @@ export async function updateProject(
 
 export async function deleteProject(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/projects/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/projects/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -527,7 +527,7 @@ export async function deleteProject(id: string): Promise<boolean> {
 
 export async function fetchTags(): Promise<Tag[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tags`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/tags`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => tagFromApi(r));
@@ -540,7 +540,7 @@ export async function createTag(
   payload: Pick<Tag, "name" | "color" | "teamId">,
 ): Promise<Tag | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tags`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tags`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -558,7 +558,7 @@ export async function updateTag(
   patch: Partial<Pick<Tag, "name" | "color" | "teamId">>,
 ): Promise<Tag | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tags/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tags/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -573,7 +573,7 @@ export async function updateTag(
 
 export async function deleteTag(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/tags/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/tags/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -610,7 +610,7 @@ export interface SyncPullResponse {
 
 export async function syncPush(payload: SyncPushPayload): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/sync/push`, {
+    const res = await fetch(`${getApiBase()}/api/v1/sync/push`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -625,7 +625,7 @@ export async function exportIcal(startDate?: string, endDate?: string): Promise<
   const params = new URLSearchParams();
   if (startDate) params.set("start_date", startDate);
   if (endDate) params.set("end_date", endDate);
-  const url = `${BASE}/api/v1/sync/export-ical${params.size ? `?${params}` : ""}`;
+  const url = `${getApiBase()}/api/v1/sync/export-ical${params.size ? `?${params}` : ""}`;
   const res = await fetch(url, { headers: authHeaders() });
   if (!res.ok) throw new Error("导出失败");
   const blob = await res.blob();
@@ -641,7 +641,7 @@ export async function syncPull(
   since: string | null,
 ): Promise<SyncPullResponse | null> {
   try {
-    const url = since ? `${BASE}/api/v1/sync/pull?since=${encodeURIComponent(since)}` : `${BASE}/api/v1/sync/pull`;
+    const url = since ? `${getApiBase()}/api/v1/sync/pull?since=${encodeURIComponent(since)}` : `${getApiBase()}/api/v1/sync/pull`;
     const res = await fetch(url, { headers: authHeaders() });
     const data = await handleResponse<{
       nextCursor: string | null;
@@ -673,7 +673,7 @@ export async function uploadFile(file: File): Promise<{ objectKey: string } | nu
   try {
     const form = new FormData();
     form.append("file", file);
-    const res = await fetch(`${BASE}/api/v1/ai/files/upload`, {
+    const res = await fetch(`${getApiBase()}/api/v1/ai/files/upload`, {
       method: "POST",
       headers: authHeaders(),
       body: form,
@@ -687,7 +687,7 @@ export async function uploadFile(file: File): Promise<{ objectKey: string } | nu
 
 export async function getMe(): Promise<{ id: string; email: string; username: string; avatar_url: string } | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/me`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/auth/me`, { headers: authHeaders() });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -697,7 +697,7 @@ export async function getMe(): Promise<{ id: string; email: string; username: st
 
 export async function changeAvatar(avatarUrl: string): Promise<{ id: string; email: string; username: string; avatar_url: string } | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/avatar`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/avatar`, {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ avatar_url: avatarUrl }),
@@ -712,7 +712,7 @@ export async function changeAvatar(avatarUrl: string): Promise<{ id: string; ema
 export async function getFilePresignUrl(objectKey: string): Promise<string | null> {
   try {
     const res = await fetch(
-      `${BASE}/api/v1/ai/files/presign?object_key=${encodeURIComponent(objectKey)}`,
+      `${getApiBase()}/api/v1/ai/files/presign?object_key=${encodeURIComponent(objectKey)}`,
       { headers: authHeaders() },
     );
     const data = await handleResponse<{ url: string }>(res);
@@ -728,7 +728,7 @@ export async function getFilePresignUrl(objectKey: string): Promise<string | nul
 
 export async function changeUsername(username: string): Promise<{ id: string; email: string; username: string } | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/username`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/username`, {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
@@ -742,7 +742,7 @@ export async function changeUsername(username: string): Promise<{ id: string; em
 
 export async function changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/auth/password`, {
+    const res = await fetch(`${getApiBase()}/api/v1/auth/password`, {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
@@ -759,7 +759,7 @@ export async function changePassword(oldPassword: string, newPassword: string): 
 
 export async function fetchTeams(): Promise<Team[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/teams`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => ({
@@ -776,7 +776,7 @@ export async function fetchTeams(): Promise<Team[] | null> {
 
 export async function createTeam(payload: { name: string }): Promise<Team | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -797,7 +797,7 @@ export async function createTeam(payload: { name: string }): Promise<Team | null
 
 export async function getTeam(teamId: string): Promise<Team | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>>(res);
     if (!data) return null;
     return {
@@ -814,7 +814,7 @@ export async function getTeam(teamId: string): Promise<Team | null> {
 
 export async function updateTeam(teamId: string, payload: { name: string }): Promise<Team | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -835,7 +835,7 @@ export async function updateTeam(teamId: string, payload: { name: string }): Pro
 
 export async function deleteTeam(teamId: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -847,7 +847,7 @@ export async function deleteTeam(teamId: string): Promise<boolean> {
 
 export async function fetchTeamMembers(teamId: string): Promise<TeamMember[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/members`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/members`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => ({
@@ -870,7 +870,7 @@ export async function inviteTeamMember(
   payload: { email: string; role: string },
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/invite`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/invite`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -887,7 +887,7 @@ export async function updateTeamMember(
   payload: { role: string },
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/members/${targetUserId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/members/${targetUserId}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -900,7 +900,7 @@ export async function updateTeamMember(
 
 export async function removeTeamMember(teamId: string, targetUserId: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/members/${targetUserId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/members/${targetUserId}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -912,7 +912,7 @@ export async function removeTeamMember(teamId: string, targetUserId: string): Pr
 
 export async function transferTeamOwnership(teamId: string, targetUserId: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/transfer-ownership`, {
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/transfer-ownership`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ target_user_id: targetUserId }),
@@ -925,7 +925,7 @@ export async function transferTeamOwnership(teamId: string, targetUserId: string
 
 export async function fetchTeamProjects(teamId: string): Promise<Project[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/projects`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/projects`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => projectFromApi(r));
@@ -936,7 +936,7 @@ export async function fetchTeamProjects(teamId: string): Promise<Project[] | nul
 
 export async function fetchTeamTags(teamId: string): Promise<Tag[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/teams/${teamId}/tags`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/teams/${teamId}/tags`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => tagFromApi(r));
@@ -965,7 +965,7 @@ export function scheduleFromApi(raw: Record<string, unknown>): Schedule {
 
 export async function fetchSchedules(from?: string, to?: string): Promise<Schedule[] | null> {
   try {
-    let url = `${BASE}/api/v1/schedules`;
+    let url = `${getApiBase()}/api/v1/schedules`;
     const params: string[] = [];
     if (from) params.push(`from=${encodeURIComponent(from)}`);
     if (to) params.push(`to=${encodeURIComponent(to)}`);
@@ -988,7 +988,7 @@ export async function createSchedule(payload: {
   location?: string | null;
 }): Promise<Schedule | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/schedules`, {
+    const res = await fetch(`${getApiBase()}/api/v1/schedules`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1013,7 +1013,7 @@ export async function updateSchedule(
   }>,
 ): Promise<Schedule | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/schedules/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/schedules/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -1028,7 +1028,7 @@ export async function updateSchedule(
 
 export async function deleteSchedule(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/schedules/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/schedules/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -1070,7 +1070,7 @@ export async function fetchPomodoros(filters?: {
   to?: string;
 }): Promise<PomodoroSession[] | null> {
   try {
-    let url = `${BASE}/api/v1/pomodoros`;
+    let url = `${getApiBase()}/api/v1/pomodoros`;
     const params: string[] = [];
     if (filters?.taskId) params.push(`task_id=${encodeURIComponent(filters.taskId)}`);
     if (filters?.from) params.push(`from=${encodeURIComponent(filters.from)}`);
@@ -1091,7 +1091,7 @@ export async function createPomodoro(payload: {
   duration_minutes?: number;
 }): Promise<PomodoroSession | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/pomodoros`, {
+    const res = await fetch(`${getApiBase()}/api/v1/pomodoros`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1113,7 +1113,7 @@ export async function updatePomodoro(
   }>,
 ): Promise<PomodoroSession | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/pomodoros/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/pomodoros/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -1128,7 +1128,7 @@ export async function updatePomodoro(
 
 export async function deletePomodoro(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/pomodoros/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/pomodoros/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -1140,7 +1140,7 @@ export async function deletePomodoro(id: string): Promise<boolean> {
 
 export async function fetchPomodoroStats(): Promise<PomodoroStats | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/pomodoros/stats`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/pomodoros/stats`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>>(res);
     if (!data) return null;
     return {
@@ -1175,7 +1175,7 @@ export function noteFromApi(raw: Record<string, unknown>): Note {
 
 export async function fetchNotes(): Promise<Note[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/notes`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/notes`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => noteFromApi(r));
@@ -1190,7 +1190,7 @@ export async function createNote(payload: {
   is_markdown?: boolean;
 }): Promise<Note | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/notes`, {
+    const res = await fetch(`${getApiBase()}/api/v1/notes`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1208,7 +1208,7 @@ export async function updateNote(
   patch: Partial<{ title: string | null; content: string | null; is_markdown: boolean | null }>,
 ): Promise<Note | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/notes/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/notes/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -1223,7 +1223,7 @@ export async function updateNote(
 
 export async function deleteNote(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/notes/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/notes/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -1250,7 +1250,7 @@ export function smartListFromApi(raw: Record<string, unknown>): import("@tasktic
 
 export async function fetchSmartLists(): Promise<import("@tasktick/shared").SmartList[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/smart-lists`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/smart-lists`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => smartListFromApi(r));
@@ -1263,7 +1263,7 @@ export async function createSmartList(
   payload: { name: string; color?: string | null; filter?: import("@tasktick/shared").SmartListFilter },
 ): Promise<import("@tasktick/shared").SmartList | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/smart-lists`, {
+    const res = await fetch(`${getApiBase()}/api/v1/smart-lists`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1281,7 +1281,7 @@ export async function updateSmartList(
   patch: { name?: string; color?: string | null; filter?: import("@tasktick/shared").SmartListFilter },
 ): Promise<import("@tasktick/shared").SmartList | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/smart-lists/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/smart-lists/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -1296,7 +1296,7 @@ export async function updateSmartList(
 
 export async function deleteSmartList(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/smart-lists/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/smart-lists/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -1330,7 +1330,7 @@ export async function fetchLocationReminders(): Promise<
   import("@tasktick/shared").LocationReminder[] | null
 > {
   try {
-    const res = await fetch(`${BASE}/api/v1/location-reminders`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/location-reminders`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => locationReminderFromApi(r));
@@ -1343,7 +1343,7 @@ export async function fetchLocationRemindersByTask(
   taskId: string,
 ): Promise<import("@tasktick/shared").LocationReminder[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/location-reminders/by-task/${taskId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/location-reminders/by-task/${taskId}`, {
       headers: authHeaders(),
     });
     const data = await handleResponse<Record<string, unknown>[]>(res);
@@ -1364,7 +1364,7 @@ export async function createLocationReminder(payload: {
   enabled?: boolean;
 }): Promise<import("@tasktick/shared").LocationReminder | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/location-reminders`, {
+    const res = await fetch(`${getApiBase()}/api/v1/location-reminders`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1389,7 +1389,7 @@ export async function updateLocationReminder(
   }>,
 ): Promise<import("@tasktick/shared").LocationReminder | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/location-reminders/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/location-reminders/${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -1404,7 +1404,7 @@ export async function updateLocationReminder(
 
 export async function deleteLocationReminder(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/location-reminders/${id}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/location-reminders/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -1420,7 +1420,7 @@ export async function deleteLocationReminder(id: string): Promise<boolean> {
 
 export async function fetchComments(taskId: string): Promise<import("@tasktick/shared").Comment[] | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/comments/task/${taskId}`, { headers: authHeaders() });
+    const res = await fetch(`${getApiBase()}/api/v1/comments/task/${taskId}`, { headers: authHeaders() });
     const data = await handleResponse<Record<string, unknown>[]>(res);
     if (!data) return null;
     return data.map((r) => ({
@@ -1438,7 +1438,7 @@ export async function fetchComments(taskId: string): Promise<import("@tasktick/s
 
 export async function createComment(taskId: string, content: string): Promise<import("@tasktick/shared").Comment | null> {
   try {
-    const res = await fetch(`${BASE}/api/v1/comments?task_id=${taskId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/comments?task_id=${taskId}`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
@@ -1460,7 +1460,7 @@ export async function createComment(taskId: string, content: string): Promise<im
 
 export async function deleteComment(commentId: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE}/api/v1/comments/${commentId}`, {
+    const res = await fetch(`${getApiBase()}/api/v1/comments/${commentId}`, {
       method: "DELETE",
       headers: authHeaders(),
     });

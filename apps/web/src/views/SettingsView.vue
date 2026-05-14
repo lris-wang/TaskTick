@@ -22,7 +22,7 @@ const { t } = useI18n();
 
 const SETTINGS_MENU_KEY = "tasktick.settings.activeMenu";
 const savedMenu = localStorage.getItem(SETTINGS_MENU_KEY);
-const validMenus = ["personal", "language", "theme", "notification", "backup", "vip", "features"];
+const validMenus = ["personal", "language", "theme", "notification", "backup", "vip", "features", "deployment"];
 const activeMenu = ref<string>(savedMenu && validMenus.includes(savedMenu) ? savedMenu : "personal");
 watch(activeMenu, (val) => localStorage.setItem(SETTINGS_MENU_KEY, val));
 
@@ -510,6 +510,7 @@ const menuOptions = computed(() => {
     { key: "backup", label: t('settings.backup') },
     { key: "vip", label: t('settings.vip') },
     { key: "features", label: t('settings.features') },
+    { key: "deployment", label: t('settings.deploymentMode') },
   ];
 });
 
@@ -1181,6 +1182,44 @@ function onLocaleChange(locale: string) {
                 />
               </div>
             </div>
+          </NCard>
+        </template>
+
+        <!-- Deployment mode -->
+        <template v-else-if="activeMenu === 'deployment'">
+          <NCard class="settings-card" :bordered="false" size="large">
+            <template #header>
+              <NText strong style="font-size:15px">{{ t('settings.deploymentMode') }}</NText>
+            </template>
+            <NText depth="3" style="font-size:13px;display:block;margin-bottom:16px;line-height:1.6">
+              {{ t('settings.deploymentModeHint') }}
+            </NText>
+            <div class="mode-toggle">
+              <button
+                class="mode-btn"
+                :class="{ 'mode-btn--active': auth.deploymentMode === 'cloud' }"
+                @click="auth.setDeploymentMode('cloud')"
+              >
+                <span class="mode-icon">☁️</span>
+                <NText :depth="auth.deploymentMode === 'cloud' ? 1 : 3" style="font-size:13px">{{ t('settings.cloudMode') }}</NText>
+              </button>
+              <button
+                class="mode-btn"
+                :class="{
+                  'mode-btn--active': auth.deploymentMode === 'local',
+                  'mode-btn--disabled': !auth.isVip
+                }"
+                :disabled="!auth.isVip"
+                :title="!auth.isVip ? t('settings.localModeVipOnly') : ''"
+                @click="auth.isVip && auth.setDeploymentMode('local')"
+              >
+                <span class="mode-icon">💻</span>
+                <NText :depth="auth.deploymentMode === 'local' ? 1 : 3" style="font-size:13px">{{ t('settings.localMode') }}</NText>
+              </button>
+            </div>
+            <NText v-if="!auth.isVip" depth="3" style="font-size:12px;display:block;margin-top:12px">
+              {{ t('settings.localModeVipOnly') }}
+            </NText>
           </NCard>
         </template>
       </div>

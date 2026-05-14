@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { login as apiLogin, phoneLogin as apiPhoneLogin } from "../api";
 import { newId } from "../utils/id";
+import { getApiBase } from "../utils/apiBase";
 
 const STORAGE_KEY = "tasktick.auth.v1";
 const DEVICE_ID_KEY = "tasktick.device.id";
@@ -32,6 +33,24 @@ export interface AuthPersisted {
   notesEnabled?: boolean;
   /** 列表默认排序模式 */
   listSortMode?: "manual" | "priority" | "createdAt" | "dueAt" | "title";
+  /** 部署模式："cloud" | "local"（默认 "cloud"） */
+  deploymentMode?: "cloud" | "local";
+  /** 是否为 VIP */
+  isVip?: boolean;
+}
+
+export const CLOUD_API_URL = "https://tasktick-1.onrender.com";
+export const LOCAL_API_URL = "http://localhost:8000";
+
+export function getApiBase(): string {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.deploymentMode === "local") return LOCAL_API_URL;
+    }
+  } catch {}
+  return CLOUD_API_URL;
 }
 
 /** 获取或生成设备 ID */
@@ -74,6 +93,8 @@ function loadPersisted(): AuthPersisted | null {
       statsEnabled: o.statsEnabled as boolean | undefined,
       notesEnabled: o.notesEnabled as boolean | undefined,
       listSortMode: o.listSortMode as "manual" | "priority" | "createdAt" | "dueAt" | "title" | undefined,
+      deploymentMode: o.deploymentMode as "cloud" | "local" | undefined,
+      isVip: o.isVip as boolean | undefined,
     };
   } catch (err) {
     console.error("[auth] loadPersisted error:", err);
@@ -107,6 +128,10 @@ export const useAuthStore = defineStore("auth", {
     notesEnabled: false,
     /** 列表默认排序模式，默认 priority */
     listSortMode: "priority" as "manual" | "priority" | "createdAt" | "dueAt" | "title",
+    /** 部署模式，默认 "cloud" */
+    deploymentMode: "cloud" as "cloud" | "local",
+    /** 是否为 VIP，默认 false */
+    isVip: false,
     /** 是否已完成 hydrate（防止 beforeEach 在 hydrate 前执行） */
     hydrated: false,
   }),
@@ -138,6 +163,8 @@ export const useAuthStore = defineStore("auth", {
       this.statsEnabled = p.statsEnabled ?? false;
       this.notesEnabled = p.notesEnabled ?? false;
       this.listSortMode = p.listSortMode ?? "priority";
+      this.deploymentMode = p.deploymentMode ?? "cloud";
+      this.isVip = p.isVip ?? false;
       this.hydrated = true;
       console.log("[auth] hydrate done, isLoggedIn=", this.isLoggedIn);
     },
@@ -163,6 +190,8 @@ export const useAuthStore = defineStore("auth", {
           statsEnabled: this.statsEnabled,
           notesEnabled: this.notesEnabled,
           listSortMode: this.listSortMode,
+          deploymentMode: this.deploymentMode,
+          isVip: this.isVip,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(body));
       } catch (err) {
@@ -253,7 +282,7 @@ export const useAuthStore = defineStore("auth", {
       // Directly call logout API to blacklist token, avoiding circular import with api module
       const token = this.token;
       try {
-        await fetch(`/api/v1/auth/logout`, {
+        await fetch(`${getApiBase()}/api/v1/auth/logout`, {
           method: "POST",
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -301,6 +330,15 @@ export const useAuthStore = defineStore("auth", {
     },
     setListSortMode(mode: "manual" | "priority" | "createdAt" | "dueAt" | "title") {
       this.listSortMode = mode;
+      this.persist();
+    },
+    setDeploymentMode(mode: "cloud" | "local") {
+      if (mode === "local" && !this.isVip) return;
+      this.deploymentMode = mode;
+      this.persist();
+    },
+    setIsVip(val: boolean) {
+      this.isVip = val;
       this.persist();
     },
   },
