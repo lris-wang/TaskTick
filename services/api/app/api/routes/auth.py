@@ -25,6 +25,7 @@ from app.schemas.auth import (
     SendResetCodeRequest,
     SendVerifyCodeRequest,
     SendPhoneVerifyCodeRequest,
+    SetVipRequest,
     TokenResponse,
     UserLogin,
     UserRegister,
